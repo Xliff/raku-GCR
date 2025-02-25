@@ -1,0 +1,12 @@
+prefix=Gcr
+struct-prefix=Gcr
+modules=GCR::Raw::Types
+backups=backup,google-backup,github,sourcehut
+hfile-prefix=
+lib=gcr
+include-directory=/home/cbwood/Projects/gcr
+exec=p6gtkexec
+subprefixes=
+idir-avail=True
+extension=.h
+build-exclude=GCR::Raw::Traps
