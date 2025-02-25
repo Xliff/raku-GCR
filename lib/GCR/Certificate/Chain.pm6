@@ -15,6 +15,7 @@ our subset GcrCertificateChainAncestry is export of Mu
 class GCR::Certificate::Chain {
   also does GLib::Roles::Object;
   also does Positional;
+  also does Iterable;
 
   has GcrCertificateChain $!gcc is implementor;
 
@@ -200,7 +201,17 @@ class GCR::Certificate::Chain {
   ## Positional
   method AT-POS (\k) is also<AT_POS> {
     return Nil unless k ~~ Int && k ~~ 0 ..^ $.get_length;
+
     $.get_certificate(k);
+  }
+
+  ## Iterable
+  method iterator {
+    generate-iterator(
+      self,
+      sub      { self.get_length },
+      sub ($_) { self.get_certificate($_) }
+    )
   }
 
 }
