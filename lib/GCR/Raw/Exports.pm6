@@ -8,5 +8,6 @@ BEGIN {
   @gcr-exports = <
     GCR::Raw::Definitions
     GCR::Raw::Enums
+    GCK::Raw::Structs
   >;
 }
