@@ -13,6 +13,7 @@ class GcrCertificateChain         is repr<CPointer> does GLib::Roles::Pointers i
 class GcrCertificateExtensionList is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrPrompt                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSecretExchange           is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrSimpleCertificate        is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSubjectPublicKeyInfo     is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompt             is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompter           is repr<CPointer> does GLib::Roles::Pointers is export { }
