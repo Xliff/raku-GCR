@@ -25,6 +25,47 @@ sub setup {
   $dhan := %test<dhansak-cert>;
 }
 
+sub test-list-extensions {
+  my $exts = $dsa.list_extensions;
+
+  ok
+    $exts.get_item_type == GCR::Certificate::Extension.get_type,
+    'Return value of .list-extensions is the proper type.';
+
+  my $i = $exts.elems;
+  ok
+    $i == 9,
+    'Returned list has the proper number of elements';
+
+  ok
+    $exts.n-items == $i,
+    'Element count property matches value retrieved by method.';
+
+  nok
+    $exts.get_item(9),
+    'Element 9 does not exist, since it is beyond the end of the list!';
+
+  for $exts {
+    ok $_, "Extension List Element { $_ } is non-null";
+
+    is
+      .get_type,
+      GCR::Certificate::Extension.get_type,
+      "Extension List Element { $_ } is the proper type";
+  }
+
+  # cw: These may need to be implemented.
+  #
+  # ok
+  #   $exts.find-by-oid( GLib::Quart.to-string(GCR_OID_BASIC_CONSTRAINTS) ),
+  #   'GCR_OID_BASIC_CONSTRAINT Extension was found';
+  #
+  # ok
+  #   $exts.find-by-oid( GLib::Quark.to-string(GCR_OID_SUBJECT_ALT_NAME) ),
+  #   'GCR_OID_SUBJECT_ALT_NAME Extension was found';
+
+}
+
 sub MAIN {
   setup();
 
@@ -134,4 +175,18 @@ sub MAIN {
   nok
     $cert.is_issuer($dsa),
     'Cert does not use DSA cert as an issuer.';
+
+  # cw: Aparently no longer supported by GCR-4
+  #test-list-extensions;
+
+  my ($i, $p) = $dsa.get_basic_constraints;
+
+  ok $i.defined,
+     'Call to .get_basic_constraints was successful';
+
+  nok $i,     'DSA cert is not a CA';
+  is  $p, -1, 'DSA cert has a path length of -1';
+
+
+
 }
