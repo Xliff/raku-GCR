@@ -51,6 +51,9 @@ class GCR::Simple::Certificate {
     is also<GcrSimpleCertificate>
   { $!gsc }
 
+  proto method new (|)
+  { * }
+
   multi method new (
     $gcr-simple-certificate where * ~~ GcrSimpleCertificateAncestry,
 
@@ -63,12 +66,9 @@ class GCR::Simple::Certificate {
     $o;
   }
 
-  method get_type is also<get-type> {
-    state ($n, $t);
-
-    unstable_get_type( self.^name, &gcr_simple_certificate_get_type, $n, $t );
+  multi method new (SizedCArray $contents) {
+    samewith($contents.CArray, $contents.elems);
   }
-
   multi method new (@contents) {
     samewith( ArrayToCArray(uint8, @contents) );
   }
@@ -102,6 +102,12 @@ class GCR::Simple::Certificate {
     );
 
     $gcr-simple-certificate ?? self.bless( :$gcr-simple-certificate ) !! Nil;
+  }
+
+  method get_type is also<get-type> {
+    state ($n, $t);
+
+    unstable_get_type( self.^name, &gcr_simple_certificate_get_type, $n, $t );
   }
 
 }
