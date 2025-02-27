@@ -18,5 +18,4 @@ class GckAttribute is repr<CStruct> does GLib::Roles::Pointers is export {
       FETCH => -> $     { $!value      },
       STORE => -> $, \v { $!value := v }
   }
-
-};
+}
