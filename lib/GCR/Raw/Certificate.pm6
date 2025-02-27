@@ -3,8 +3,8 @@ use v6.c;
 use NativeCall;
 
 use GLib::Raw::Definitions;
-use GLib::Raw::Enums;
 use GLib::Raw::Structs;
+use GLib::Raw::Enums;
 use GCR::Raw::Definitions;
 
 unit package GCR::Raw::Certificate;
@@ -39,9 +39,9 @@ sub gcr_certificate_get_expiry_date (GcrCertificate $self)
 sub gcr_certificate_get_fingerprint (
   GcrCertificate $self,
   GChecksumType  $type,
-  gsize          $n_length
+  gsize          $n_length is rw
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -96,9 +96,9 @@ sub gcr_certificate_get_issuer_part (
 
 sub gcr_certificate_get_issuer_raw (
   GcrCertificate $self,
-  gsize          $n_data
+  gsize          $n_data is rw
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -159,9 +159,9 @@ sub gcr_certificate_get_subject_part (
 
 sub gcr_certificate_get_subject_raw (
   GcrCertificate $self,
-  gsize          $n_data
+  gsize          $n_data is rw
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }

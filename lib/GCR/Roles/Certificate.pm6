@@ -11,6 +11,16 @@ use GLib::Roles::Object;
 role GCR::Roles::Certificate {
   has GcrCertificate $!gc is implementor;
 
+  method roleInit-GcrCertificate {
+    return if $!gc;
+
+    my \i = findProperImplementor(self.^attributes);
+    $!gc = cast( GcrCertificate, i.get_value(self) );
+  }
+
+  method GCR::Raw::Definitions::GcrCertificate { $!gc }
+  method GcrCertificate                        { $!gc }
+
   # Type: string
   method description is rw  is g-property {
     my $gv = GLib::Value.new( G_TYPE_STRING );
@@ -20,7 +30,8 @@ role GCR::Roles::Certificate {
         $gv.string;
       },
       STORE => -> $, Str() $val is copy {
-        warn 'description does not allow writing'
+        warn 'd
+        escription does not allow writing'
       }
     );
   }
@@ -85,7 +96,7 @@ role GCR::Roles::Certificate {
     );
   }
 
-  method gcr_certificate_get_basic_constraints (
+  method get_basic_constraints (
     Int() $is_ca,
           $path_len is rw
   ) {
@@ -97,7 +108,7 @@ role GCR::Roles::Certificate {
     $r;
   }
 
-  method gcr_certificate_get_der_data ($n_data is rw) {
+  method get_der_data ($n_data is rw) {
     my gsize $n = $n_data;
 
     my $r = gcr_certificate_get_der_data($!gc, $n_data);
@@ -105,67 +116,91 @@ role GCR::Roles::Certificate {
     $r;
   }
 
-  method gcr_certificate_get_expiry_date {
-    gcr_certificate_get_expiry_date($!gc);
+  method get_expiry_date ( :$raw = False, :$raku = True ) {
+    my $d = propReturnObject(
+      gcr_certificate_get_expiry_date($!gc),
+      $raw,
+      |GLib::DateTime.getTypePair
+    );
+    return $d unless $raku;
+    $d.DateTime;
   }
 
-  method gcr_certificate_get_fingerprint (Int() $type, $n_length is rw) {
+  proto method get_fingerprint (|)
+  { * }
+
+  multi method get_fingerprint (Int() $type, :$sized = True) {
+    samewith($type, $, :$sized);
+  }
+  multi method get_fingerprint (Int() $type, $n_length is rw, :$sized = True) {
     my GChecksumType $t = $type;
     my gsize         $n = 0;
 
-    my $r = gcr_certificate_get_fingerprint($!gc, $type, $n_length);
+    my $r = gcr_certificate_get_fingerprint($!gc, $type, $n);
     $n_length = $n;
-    $r;
+    return ($r, $n_length) unless $sized;
+    SizedCArray.new($r, $n_length);
   }
 
-  method gcr_certificate_get_fingerprint_hex (Int() $type) {
+  method get_fingerprint_hex (Int() $type) {
     my GChecksumType $t = $type;
 
     gcr_certificate_get_fingerprint_hex($!gc, $t);
-    $type = $t;
   }
 
-  method gcr_certificate_get_interface_elements {
+  method get_interface_elements {
     gcr_certificate_get_interface_elements($!gc);
   }
 
-  method gcr_certificate_get_issued_date {
-    gcr_certificate_get_issued_date($!gc);
+  method get_issued_date ( :$raw = False, :$raku = True ) {
+    my $d = propReturnObject(
+      gcr_certificate_get_issued_date($!gc),
+      $raw,
+      |GLib::DateTime.getTypePair
+    );
+    return $d unless $raku;
+    $d.DateTime;
   }
 
-  method gcr_certificate_get_issuer_cn {
+  method get_issuer_cn {
     gcr_certificate_get_issuer_cn($!gc);
   }
 
-  method gcr_certificate_get_issuer_dn {
+  method get_issuer_dn {
     gcr_certificate_get_issuer_dn($!gc);
   }
 
-  method gcr_certificate_get_issuer_name {
+  method get_issuer_name {
     gcr_certificate_get_issuer_name($!gc);
   }
 
-  method gcr_certificate_get_issuer_part (Str() $part) {
+  method get_issuer_part (Str() $part) {
     gcr_certificate_get_issuer_part($!gc, $part);
   }
 
-  method gcr_certificate_get_issuer_raw ($n_data is rw) {
+  proto method get_issuer_raw (|)
+  { * }
+
+  multi method get_issuer_raw {
+    samewith($);
+  }
+  multi method get_issuer_raw ($n_data is rw) {
     my gsize $n = 0;
 
-    my $r = gcr_certificate_get_issuer_raw($!gc, $n_data);
+    my $r = gcr_certificate_get_issuer_raw($!gc, $n);
     $n_data = $n;
-    $r;
+    SizedCArray.new($r, $n);
   }
 
-  method gcr_certificate_get_key_size {
+  method get_key_size {
     gcr_certificate_get_key_size($!gc);
   }
 
-  method gcr_certificate_get_public_key_info {
+  method get_public_key_info {
     gcr_certificate_get_public_key_info($!gc);
   }
 
-  method gcr_certificate_get_serial_number ($n_length is rw) {
+  method get_serial_number ($n_length is rw) {
     my gsize $n = $n_length;
 
     my $r = gcr_certificate_get_serial_number($!gc, $n);
@@ -173,63 +208,70 @@ role GCR::Roles::Certificate {
     $r;
   }
 
-  method gcr_certificate_get_serial_number_hex {
+  method get_serial_number_hex {
     gcr_certificate_get_serial_number_hex($!gc);
   }
 
-  method gcr_certificate_get_subject_cn {
+  method get_subject_cn {
     gcr_certificate_get_subject_cn($!gc);
   }
 
-  method gcr_certificate_get_subject_dn {
+  method get_subject_dn {
     gcr_certificate_get_subject_dn($!gc);
   }
 
-  method gcr_certificate_get_subject_name {
+  method get_subject_name {
     gcr_certificate_get_subject_name($!gc);
   }
 
-  method gcr_certificate_get_subject_part (Str() $part) {
+  method get_subject_part (Str() $part) {
     gcr_certificate_get_subject_part($!gc, $part);
   }
 
-  method gcr_certificate_get_subject_raw ($n_data is rw) {
+  proto method get_subject_raw (|)
+  { * }
+
+  multi method get_subject_raw {
+    samewith($);
+  }
+  multi method get_subject_raw ($n_data is rw, :$sized = True) {
     my gsize $n = 0;
-    my       $r = gcr_certificate_get_subject_raw($!gc, $n_data);
+    my       $r = gcr_certificate_get_subject_raw($!gc, $n);
 
     $n_data = $n;
-    $r;
+    return ($r, $n_data) unless $sized;
+    SizedCArray.new($r, $n);
   }
 
-  method gcr_certificate_get_type {
+  method get_type {
     state ($n, $t);
 
     unstable_get_type( self.^name, &gcr_certificate_get_type, $n, $t );
   }
 
-  method gcr_certificate_get_version {
+  method get_version {
     gcr_certificate_get_version($!gc);
   }
 
-  method gcr_certificate_is_issuer (GcrCertificate() $issuer) {
+  method is_issuer (GcrCertificate() $issuer) {
     gcr_certificate_is_issuer($!gc, $issuer);
   }
 
-  method gcr_certificate_list_extensions {
+  method list_extensions {
     gcr_certificate_list_extensions($!gc);
   }
 }
 
 # cw: Not sure how these work, so ignored... for now.
-  # method gcr_certificate_mixin_class_init {
+  # method mixin_class_init {
   #   gcr_certificate_mixin_class_init($!gc);
   # }
   #
-  # method gcr_certificate_mixin_emit_notify {
+  # method mixin_emit_notify {
   #   gcr_certificate_mixin_emit_notify($!gc);
   # }
   #
-  # method gcr_certificate_mixin_get_property (
+  # method mixin_get_property (
   #   GObject    $obj,
   #   guint      $prop_id,
   #   GValue     $value,
@@ -238,51 +280,24 @@ role GCR::Roles::Certificate {
   #   gcr_certificate_mixin_get_property($!gc, $prop_id, $value, $pspec);
   # }
 
-
-use GLib::Roles::Object;
-
-our subset GcrCertificateAncestry is export of Mu
-  where GcrCertificate | GObject;
+use GLib::Roles::Implementor;
 
 class GCR::Certificate {
-  also does GLib::Roles::Object;
+  also does GLib::Roles::Implementor;
   also does GCR::Roles::Certificate;
 
   submethod BUILD ( :$gcr-certificate ) {
-    self.setGcrCertificate($gcr-certificate) if $gcr-certificate
-  }
-
-  method setGcrCertificate (GcrCertificateAncestry $_) {
-    my $to-parent;
-
-    $!gc = do {
-      when GcrCertificate {
-        $to-parent = cast(GObject, $_);
-        $_;
-      }
-
-      default {
-        $to-parent = $_;
-        cast(GcrCertificate, $_);
-      }
-    }
-    self!setObject($to-parent);
+    $!gc = $gcr-certificate if $gcr-certificate;
   }
 
   method Gcr::Raw::Definitions::GcrCertificate
     is also<GcrCertificate>
   { $!gc }
 
-  multi method new (
-    $gcr-certificate where * ~~ GcrCertificateAncestry ,
-
-    :$ref = True
-  ) {
+  multi method new (GcrCertificate $gcr-certificate) {
     return unless $gcr-certificate;
 
-    my $o = self.bless( :$gcr-certificate );
-    $o.ref if $ref;
-    $o;
+    self.bless( :$gcr-certificate );
   }
 
 }
