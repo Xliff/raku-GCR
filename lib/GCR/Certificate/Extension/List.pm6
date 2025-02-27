@@ -18,6 +18,8 @@ our subset GcrCertificateExtensionListAncestry is export of Mu
 class GCR::ExtensionList {
   also does GLib::Roles::Object;
   also does GIO::Roles::ListMode;
+  also does Positional;
+  also does Iterable;
 
   has GcrCertificateExtensionList $!gcel is implementor;
 
@@ -97,6 +99,21 @@ class GCR::ExtensionList {
       gcr_certificate_extension_list_get_extension($!gcel, $p),
       $raw,
       |GCR::Certificate::Extension.getTypePair
+    );
+  }
+
+  # Positional
+
+  method AT-POS (\k) {
+    return Nil unless k ~~ Int && k ~~ 0 .. self.elems;
+    $.get_extension(k);
+  }
+
+  method iterator {
+    generic-iterator(
+      self,
+      SUB      { self.elems     }
+      sub (\k) { self.AT-POS(k) }
     );
   }
 
