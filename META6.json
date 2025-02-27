@@ -1,0 +1,41 @@
+{
+    "depends": [
+	"p6-GIO"
+    ],
+    "description": "Raku library bindings for the GCR library",
+    "version": "r0.1",
+    "meta-version": "0",
+    "license": "GPL-3.0",
+    "source-url": "https://github.com/Xliff/raku-GCR",
+    "provides": {
+      "GCR::Raw::Definitions"        :  "lib/GCR/Raw/Definitions.pm6"       ,
+      "GCK::Raw::Attribute"          :  "lib/GCK/Raw/Attribute.pm6"         ,
+      "GCR::Raw::Certificate"        :  "lib/GCR/Raw/Certificate.pm6"       ,
+      "GCR::Raw::Enums"              :  "lib/GCR/Raw/Enums.pm6"             ,
+      "GCR::Raw::Certificate::Chain" :  "lib/GCR/Raw/Certificate/Chain.pm6" ,
+      "GCR::Raw::Parser"             :  "lib/GCR/Raw/Parser.pm6"            ,
+      "GCR::Raw::Prompt"             :  "lib/GCR/Raw/Prompt.pm6"            ,
+      "GCR::Raw::Secret::Exchange"   :  "lib/GCR/Raw/Secret/Exchange.pm6"   ,
+      "GCR::Raw::System::Prompt"     :  "lib/GCR/Raw/System/Prompt.pm6"     ,
+      "GCR::Raw::Exports"            :  "lib/GCR/Raw/Exports.pm6"           ,
+      "GCR::Raw::Types"              :  "lib/GCR/Raw/Types.pm6"             ,
+      "GCR::Roles::Certificate"      :  "lib/GCR/Roles/Certificate.pm6"     ,
+      "GCR::Roles::Prompt"           :  "lib/GCR/Roles/Prompt.pm6"          ,
+      "GCR::Secret::Exchange"        :  "lib/GCR/Secret/Exchange.pm6"       ,
+      "GCR::Simple::Certificate"     :  "lib/GCR/Simple/Certificate.pm6"    ,
+      "GCR::System::Prompt"          :  "lib/GCR/System/Prompt.pm6"         ,
+      "GCK::Attribute"               :  "lib/GCK/Attribute.pm6"             ,
+      "GCR::Certificate::Chain"      :  "lib/GCR/Certificate/Chain.pm6"     
+    },
+    "name": "p6-GRSS",
+    "perl": "6.c",
+    "test-depends": [],
+    "build-depends": [ ],
+    "support": {"source": null},
+    "authors": ["clifton.wood@gmail.com"],
+    "resources": [
+      "fixtures/der-certificate.crt",
+      "fixtures/der-certificate-dsa.cer",
+      "fixtures/dhansak-collabora.cer"
+    ]
+}
