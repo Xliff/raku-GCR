@@ -247,3 +247,9 @@ sub gcr_prompt_set_warning (
   is      native(gcr)
   is      export
 { * }
+
+sub gcr_prompt_get_type
+  returns GType
+  is      native(gcr)
+  is      export
+{ * }

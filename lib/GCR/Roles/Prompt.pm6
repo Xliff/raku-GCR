@@ -281,6 +281,12 @@ role GCR::Roles::Prompt {
     gcr_prompt_get_title($!gp);
   }
 
+  method gcrprompt_get_type {
+    state ($n, $t);
+
+    unstable_get_type( self.^name, &gcr_prompt_get_type, $n, $t );
+  }
+
   method get_warning {
     gcr_prompt_get_warning($!gp);
   }
@@ -423,5 +429,9 @@ class GCR::Prompt {
     my $o = self.bless( :$gcr-prompt );
     $o.ref if $ref;
     $o;
+  }
+
+  method get_type {
+    self.gcrprompt_get_type
   }
 }
