@@ -243,7 +243,7 @@ role GCR::Roles::Certificate {
     SizedCArray.new($r, $n);
   }
 
-  method get_type {
+  method gcrcertificate_get_type {
     state ($n, $t);
 
     unstable_get_type( self.^name, &gcr_certificate_get_type, $n, $t );
@@ -298,6 +298,10 @@ class GCR::Certificate {
     return unless $gcr-certificate;
 
     self.bless( :$gcr-certificate );
+  }
+
+  method get_type {
+    self.gcrcertificate_get_type;
   }
 
 }
