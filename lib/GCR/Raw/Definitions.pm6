@@ -17,3 +17,5 @@ class GcrSimpleCertificate        is repr<CPointer> does GLib::Roles::Pointers i
 class GcrSubjectPublicKeyInfo     is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompt             is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompter           is repr<CPointer> does GLib::Roles::Pointers is export { }
+
+sub gcr-resources is export { %?RESOURCES }
