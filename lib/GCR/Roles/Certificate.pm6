@@ -96,16 +96,22 @@ role GCR::Roles::Certificate {
     );
   }
 
-  method get_basic_constraints (
-    Int() $is_ca,
-          $path_len is rw
+  proto method get_basic_constraints (|)
+  { * }
+
+  multi method get_basic_constraints {
+    samewith($, $);
+  }
+  multi method get_basic_constraints (
+    $is_ca    is rw,
+    $path_len is rw
   ) {
-    my gboolean $i = $is_ca.so.Int;
+    my gboolean $i = 0;
     my gint     $p = 0;
 
-    my $r = gcr_certificate_get_basic_constraints($!gc, $is_ca, $path_len);
-    $path_len = $p;
-    $r;
+    my $r = gcr_certificate_get_basic_constraints($!gc, $i, $p);
+    return (Nil, Nil) unless $r;
+    ($is_ca, $path_len) = ($i, $p);
   }
 
   method get_der_data ($n_data is rw) {

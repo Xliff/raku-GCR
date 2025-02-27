@@ -13,7 +13,7 @@ unit package GCR::Raw::Certificate;
 
 sub gcr_certificate_get_basic_constraints (
   GcrCertificate $self,
-  gboolean       $is_ca,
+  gboolean       $is_ca    is rw,
   gint           $path_len is rw
 )
   returns uint32
