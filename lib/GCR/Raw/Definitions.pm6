@@ -10,8 +10,10 @@ constant gcr is export = 'gcr-4',v4;
 
 class GcrCertificate              is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrCertificateChain         is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrCertificateField         is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrCertificateExtension     is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrCertificateExtensionList is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrCertificateSection       is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrPrompt                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSecretExchange           is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSimpleCertificate        is repr<CPointer> does GLib::Roles::Pointers is export { }
