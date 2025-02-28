@@ -4,6 +4,7 @@ use GCR::Raw::Types;
 use GCR::Raw::Certificate;
 
 use GLib::DateTime;
+use GCR::Certificate::Section;
 
 use GLib::Roles::Implementor;
 use GLib::Roles::Object;
@@ -154,8 +155,16 @@ role GCR::Roles::Certificate {
     gcr_certificate_get_fingerprint_hex($!gc, $t);
   }
 
-  method get_interface_elements {
-    gcr_certificate_get_interface_elements($!gc);
+  method get_interface_elements (
+    :$raw            = False,
+    :gslist(:$glist) = False
+  ) {
+    returnGList(
+      gcr_certificate_get_interface_elements($!gc),
+      $raw,
+      $glist,
+      |GCR::Certificate::Section.getTypePair
+    )
   }
 
   method get_issued_date ( :$raw = False, :$raku = True ) {
