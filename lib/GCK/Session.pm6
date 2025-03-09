@@ -5,6 +5,7 @@ use NativeCall;
 use GCR::Raw::Types;
 use GCK::Raw::Session;
 
+use GLib::GList;
 use GCK::Object;
 
 use GLib::Roles::Implementor;
@@ -585,54 +586,129 @@ class GCK::Session {
     );
   }
 
-  method find_handles (
-    GckAttributes           $match,
-    GCancellable            $cancellable,
-    gulong                  $n_handles,
-    CArray[Pointer[GError]] $error
+  proto method find_handles (|)
+  { * }
+
+  multi method find_handles (
+     $match,
+     $error       = gerror,
+    :$cancellable = GCancellable
   ) {
-    gck_session_find_handles($!gs, $match, $cancellable, $n_handles, $error);
+    samewith($match, $cancellable, $, $error);
+  }
+  multi method find_handles (
+    GckAttributes            $match,
+    GCancellable             $cancellable,
+                             $n_handles    is rw,
+    CArray[Pointer[GError]]  $error,
+                            :$raw                 = False
+  ) {
+    my gulong $n = 0;
+
+    clear_error;
+    my $r = gck_session_find_handles($!gs, $match, $cancellable, $n, $error);
+    set_error($error);
+    $n_handles = $n;
+    return ($r, $n) if $raw;
+    SizedCArray.new($r, $n);
   }
 
-  method find_handles_async (
-    GckAttributes       $match,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+  proto method find_handles_async (|)
+  { * }
+
+  multi method find_handles_async (
+     $match,
+     &callback,
+     $user_data   = gpointer,
+    :$cancellable = GCancellable
   ) {
-    gck_session_find_handles_async($!gs, $match, $cancellable, $callback, $user_data);
+    samewith($match, $cancellable, &callback, $user_data);
+  }
+  multi method find_handles_async (
+    GckAttributes() $match,
+    GCancellable()  $cancellable,
+                    &callback,
+    gpointer        $user_data     = gpointer
+  ) {
+    gck_session_find_handles_async(
+      $!gs,
+      $match,
+      $cancellable,
+      &callback,
+      $user_data
+    );
   }
 
   method find_handles_finish (
-    GAsyncResult            $result,
-    gulong                  $n_handles,
-    CArray[Pointer[GError]] $error
+    GAsyncResult()           $result,
+                             $n_handles is rw,
+    CArray[Pointer[GError]]  $error            = gerror,
+                            :$raw              = False
   ) {
-    gck_session_find_handles_finish($!gs, $result, $n_handles, $error);
+    my gulong $n = 0;
+
+    clear_error;
+    my $r = gck_session_find_handles_finish($!gs, $result, $n, $error);
+    set_error($error);
+    $n_handles = $n;
+    return ($r, $n) if $raw;
+    SizedCArray.new($r, $n);
   }
 
   method find_objects (
-    GckAttributes           $match,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+    GckAttributes()          $match,
+    GCancellable()           $cancellable    = GCancellable,
+    CArray[Pointer[GError]]  $error          = gerror,
+                            :$raw            = False,
+                            :gslist(:$glist) = False
   ) {
-    gck_session_find_objects($!gs, $match, $cancellable, $error);
+    clear_error;
+    my $r = gck_session_find_objects($!gs, $match, $cancellable, $error);
+    set_error($error);
+    returnGList($r, $raw, $glist, |GCK::Object.getTypePair);
   }
 
-  method find_objects_async (
-    GckAttributes       $match,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+  proto method find_objects_async (|)
+  { * }
+
+  multi method find_objects_async (
+    $match,
+    &callback,
+    $user_data   = gpointer,
+    $cancellable = GCancellable
   ) {
-    gck_session_find_objects_async($!gs, $match, $cancellable, $callback, $user_data);
+    samewith(
+      $match,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  multi method find_objects_async (
+    GckAttributes()  $match,
+    GCancellable()   $cancellable,
+                     &callback,
+    gpointer         $user_data    = gpointer
+  ) {
+    gck_session_find_objects_async(
+      $!gs,
+      $match,
+      $cancellable,
+      &callback,
+      $user_data
+    );
   }
 
   method find_objects_finish (
-    GAsyncResult            $result,
-    CArray[Pointer[GError]] $error
+    GAsyncResult()          $result,
+    CArray[Pointer[GError]] $error           = gerror,
+                            :$raw            = False,
+                            :gslist(:$glist) = False
   ) {
-    gck_session_find_objects_finish($!gs, $result, $error);
+    clear_error;
+    my $r = gck_session_find_objects_finish($!gs, $result, $error);
+    set_error($error);
+    returnGList($r, $raw, $glist, |GCK::Object.getTypePair);
   }
 
   method generate_key_pair (
@@ -703,8 +779,12 @@ class GCK::Session {
     gck_session_get_options($!gs);
   }
 
-  method get_slot {
-    gck_session_get_slot($!gs);
+  method get_slot ( :$raw = False ) {
+    propReturnObject(
+      gck_session_get_slot($!gs),
+      $raw,
+      |GCK::Slot.getTypePair
+    );
   }
 
   method get_state {
