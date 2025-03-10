@@ -152,7 +152,7 @@ sub gck_session_encrypt (
   gulong                  $mech_type,
   Str                     $input,
   gsize                   $n_input,
-  gsize                   $n_result,
+  gsize                   $n_result is rw,
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
@@ -192,7 +192,7 @@ sub gck_session_encrypt_full (
   GckMechanism            $mechanism,
   Str                     $input,
   gsize                   $n_input,
-  gsize                   $n_result,
+  gsize                   $n_result is rw,
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
@@ -385,6 +385,439 @@ sub gck_session_get_state (GckSession $self)
 
 sub gck_session_get_type
   returns GType
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_init_pin (
+  GckSession              $self,
+  Str                     $pin,
+  gsize                   $n_pin,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_init_pin_async (
+  GckSession          $self,
+  Str                 $pin,
+  gsize               $n_pin,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_init_pin_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_login (
+  GckSession              $self,
+  gulong                  $user_type,
+  Str                     $pin,
+  gsize                   $n_pin,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_login_async (
+  GckSession          $self,
+  gulong              $user_type,
+  Str                 $pin,
+  gsize               $n_pin,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_login_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_login_interactive (
+  GckSession              $self,
+  gulong                  $user_type,
+  GTlsInteraction         $interaction,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_login_interactive_async (
+  GckSession          $self,
+  gulong              $user_type,
+  GTlsInteraction     $interaction,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_login_interactive_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_logout (
+  GckSession              $self,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_logout_async (
+  GckSession          $self,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_logout_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_open (
+  GckSlot                 $slot,
+  GckSessionOptions       $options,
+  GTlsInteraction         $interaction,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns GckSession
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_open_async (
+  GckSlot             $slot,
+  GckSessionOptions   $options,
+  GTlsInteraction     $interaction,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_open_finish (
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns GckSession
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_set_interaction (
+  GckSession      $self,
+  GTlsInteraction $interaction
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_set_pin (
+  GckSession              $self,
+  Str                     $old_pin,
+  gsize                   $n_old_pin,
+  Str                     $new_pin,
+  gsize                   $n_new_pin,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_set_pin_async (
+  GckSession          $self,
+  Str                 $old_pin,
+  gsize               $n_old_pin,
+  Str                 $new_pin,
+  gsize               $n_new_pin,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_set_pin_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_sign (
+  GckSession              $self,
+  GckObject               $key,
+  gulong                  $mech_type,
+  Str                     $input,
+  gsize                   $n_input,
+  gsize                   $n_result is rw,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns Str
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_sign_async (
+  GckSession          $self,
+  GckObject           $key,
+  GckMechanism        $mechanism,
+  Str                 $input,
+  gsize               $n_input,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_sign_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  gsize                   $n_result is rw,
+  CArray[Pointer[GError]] $error
+)
+  returns Str
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_sign_full (
+  GckSession              $self,
+  GckObject               $key,
+  GckMechanism            $mechanism,
+  Str                     $input,
+  gsize                   $n_input,
+  gsize                   $n_result is rw,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns Str
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_unwrap_key (
+  GckSession              $self,
+  GckObject               $wrapper,
+  gulong                  $mech_type,
+  Str                     $input,
+  gsize                   $n_input,
+  GckAttributes           $attrs,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns GckObject
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_unwrap_key_async (
+  GckSession          $self,
+  GckObject           $wrapper,
+  GckMechanism        $mechanism,
+  Str                 $input,
+  gsize               $n_input,
+  GckAttributes       $attrs,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_unwrap_key_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns GckObject
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_unwrap_key_full (
+  GckSession              $self,
+  GckObject               $wrapper,
+  GckMechanism            $mechanism,
+  Str                     $input,
+  gsize                   $n_input,
+  GckAttributes           $attrs,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns GckObject
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_verify (
+  GckSession              $self,
+  GckObject               $key,
+  gulong                  $mech_type,
+  Str                     $input,
+  gsize                   $n_input,
+  Str                     $signature,
+  gsize                   $n_signature,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_verify_async (
+  GckSession          $self,
+  GckObject           $key,
+  GckMechanism        $mechanism,
+  Str                 $input,
+  gsize               $n_input,
+  Str                 $signature,
+  gsize               $n_signature,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_verify_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_verify_full (
+  GckSession              $self,
+  GckObject               $key,
+  GckMechanism            $mechanism,
+  Str                     $input,
+  gsize                   $n_input,
+  Str                     $signature,
+  gsize                   $n_signature,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns uint32
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_wrap_key (
+  GckSession              $self,
+  GckObject               $wrapper,
+  gulong                  $mech_type,
+  GckObject               $wrapped,
+  gsize                   $n_result is rw,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns Str
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_wrap_key_async (
+  GckSession          $self,
+  GckObject           $wrapper,
+  GckMechanism        $mechanism,
+  GckObject           $wrapped,
+  GCancellable        $cancellable,
+  GAsyncReadyCallback $callback,
+  gpointer            $user_data
+)
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_wrap_key_finish (
+  GckSession              $self,
+  GAsyncResult            $result,
+  gsize                   $n_result is rw,
+  CArray[Pointer[GError]] $error
+)
+  returns Str
+  is      native(gcr)
+  is      export
+{ * }
+
+sub gck_session_wrap_key_full (
+  GckSession              $self,
+  GckObject               $wrapper,
+  GckMechanism            $mechanism,
+  GckObject               $wrapped,
+  gsize                   $n_result is rw,
+  GCancellable            $cancellable,
+  CArray[Pointer[GError]] $error
+)
+  returns Str
   is      native(gcr)
   is      export
 { * }
