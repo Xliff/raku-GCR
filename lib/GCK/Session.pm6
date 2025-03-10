@@ -1254,4 +1254,346 @@ class GCK::Session {
     unstable_get_type( self.^name, &gck_session_get_type, $n, $t );
   }
 
+  method init_pin (
+    Str                     $pin,
+    gsize                   $n_pin,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_init_pin($!gck, $pin, $n_pin, $cancellable, $error);
+  }
+
+  method init_pin_async (
+    Str                 $pin,
+    gsize               $n_pin,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_init_pin_async($!gck, $pin, $n_pin, $cancellable, $callback, $user_data);
+  }
+
+  method init_pin_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_init_pin_finish($!gck, $result, $error);
+  }
+
+  method login (
+    gulong                  $user_type,
+    Str                     $pin,
+    gsize                   $n_pin,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_login($!gck, $user_type, $pin, $n_pin, $cancellable, $error);
+  }
+
+  method login_async (
+    gulong              $user_type,
+    Str                 $pin,
+    gsize               $n_pin,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_login_async($!gck, $user_type, $pin, $n_pin, $cancellable, $callback, $user_data);
+  }
+
+  method login_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_login_finish($!gck, $result, $error);
+  }
+
+  method login_interactive (
+    gulong                  $user_type,
+    GTlsInteraction         $interaction,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_login_interactive($!gck, $user_type, $interaction, $cancellable, $error);
+  }
+
+  method login_interactive_async (
+    gulong              $user_type,
+    GTlsInteraction     $interaction,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_login_interactive_async($!gck, $user_type, $interaction, $cancellable, $callback, $user_data);
+  }
+
+  method login_interactive_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_login_interactive_finish($!gck, $result, $error);
+  }
+
+  method logout (
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_logout($!gck, $cancellable, $error);
+  }
+
+  method logout_async (
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_logout_async($!gck, $cancellable, $callback, $user_data);
+  }
+
+  method logout_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_logout_finish($!gck, $result, $error);
+  }
+
+  method open (
+    GckSlot                 $slot,
+    GckSessionOptions       $options,
+    GTlsInteraction         $interaction,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_open($!gck, $options, $interaction, $cancellable, $error);
+  }
+
+  method open_async (
+    GckSlot             $slot,
+    GckSessionOptions   $options,
+    GTlsInteraction     $interaction,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_open_async($!gck, $options, $interaction, $cancellable, $callback, $user_data);
+  }
+
+  method open_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_open_finish($!gck, $error);
+  }
+
+  method set_interaction (
+    GTlsInteraction $interaction
+  ) {
+    gck_session_set_interaction($!gck, $interaction);
+  }
+
+  method set_pin (
+    Str                     $old_pin,
+    gsize                   $n_old_pin,
+    Str                     $new_pin,
+    gsize                   $n_new_pin,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_set_pin($!gck, $old_pin, $n_old_pin, $new_pin, $n_new_pin, $cancellable, $error);
+  }
+
+  method set_pin_async (
+    Str                 $old_pin,
+    gsize               $n_old_pin,
+    Str                 $new_pin,
+    gsize               $n_new_pin,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_set_pin_async($!gck, $old_pin, $n_old_pin, $new_pin, $n_new_pin, $cancellable, $callback, $user_data);
+  }
+
+  method set_pin_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_set_pin_finish($!gck, $result, $error);
+  }
+
+  method sign (
+    GckObject               $key,
+    gulong                  $mech_type,
+    Str                     $input,
+    gsize                   $n_input,
+    gsize                   $n_result,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_sign($!gck, $key, $mech_type, $input, $n_input, $n_result, $cancellable, $error);
+  }
+
+  method sign_async (
+    GckObject           $key,
+    GckMechanism        $mechanism,
+    Str                 $input,
+    gsize               $n_input,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_sign_async($!gck, $key, $mechanism, $input, $n_input, $cancellable, $callback, $user_data);
+  }
+
+  method sign_finish (
+    GAsyncResult            $result,
+    gsize                   $n_result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_sign_finish($!gck, $result, $n_result, $error);
+  }
+
+  method sign_full (
+    GckObject               $key,
+    GckMechanism            $mechanism,
+    Str                     $input,
+    gsize                   $n_input,
+    gsize                   $n_result,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_sign_full($!gck, $key, $mechanism, $input, $n_input, $n_result, $cancellable, $error);
+  }
+
+  method unwrap_key (
+    GckObject               $wrapper,
+    gulong                  $mech_type,
+    Str                     $input,
+    gsize                   $n_input,
+    GckAttributes           $attrs,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_unwrap_key($!gck, $wrapper, $mech_type, $input, $n_input, $attrs, $cancellable, $error);
+  }
+
+  method unwrap_key_async (
+    GckObject           $wrapper,
+    GckMechanism        $mechanism,
+    Str                 $input,
+    gsize               $n_input,
+    GckAttributes       $attrs,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_unwrap_key_async($!gck, $wrapper, $mechanism, $input, $n_input, $attrs, $cancellable, $callback, $user_data);
+  }
+
+  method unwrap_key_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_unwrap_key_finish($!gck, $result, $error);
+  }
+
+  method unwrap_key_full (
+    GckObject               $wrapper,
+    GckMechanism            $mechanism,
+    Str                     $input,
+    gsize                   $n_input,
+    GckAttributes           $attrs,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_unwrap_key_full($!gck, $wrapper, $mechanism, $input, $n_input, $attrs, $cancellable, $error);
+  }
+
+  method verify (
+    GckObject               $key,
+    gulong                  $mech_type,
+    Str                     $input,
+    gsize                   $n_input,
+    Str                     $signature,
+    gsize                   $n_signature,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_verify($!gck, $key, $mech_type, $input, $n_input, $signature, $n_signature, $cancellable, $error);
+  }
+
+  method verify_async (
+    GckObject           $key,
+    GckMechanism        $mechanism,
+    Str                 $input,
+    gsize               $n_input,
+    Str                 $signature,
+    gsize               $n_signature,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_verify_async($!gck, $key, $mechanism, $input, $n_input, $signature, $n_signature, $cancellable, $callback, $user_data);
+  }
+
+  method verify_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_verify_finish($!gck, $result, $error);
+  }
+
+  method verify_full (
+    GckObject               $key,
+    GckMechanism            $mechanism,
+    Str                     $input,
+    gsize                   $n_input,
+    Str                     $signature,
+    gsize                   $n_signature,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_verify_full($!gck, $key, $mechanism, $input, $n_input, $signature, $n_signature, $cancellable, $error);
+  }
+
+  method wrap_key (
+    GckObject               $wrapper,
+    gulong                  $mech_type,
+    GckObject               $wrapped,
+    gsize                   $n_result,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_wrap_key($!gck, $wrapper, $mech_type, $wrapped, $n_result, $cancellable, $error);
+  }
+
+  method wrap_key_async (
+    GckObject           $wrapper,
+    GckMechanism        $mechanism,
+    GckObject           $wrapped,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    gpointer            $user_data
+  ) {
+    gck_session_wrap_key_async($!gck, $wrapper, $mechanism, $wrapped, $cancellable, $callback, $user_data);
+  }
+
+  method wrap_key_finish (
+    GAsyncResult            $result,
+    gsize                   $n_result,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_wrap_key_finish($!gck, $result, $n_result, $error);
+  }
+
+  method wrap_key_full (
+    GckObject               $wrapper,
+    GckMechanism            $mechanism,
+    GckObject               $wrapped,
+    gsize                   $n_result,
+    GCancellable            $cancellable,
+    CArray[Pointer[GError]] $error
+  ) {
+    gck_session_wrap_key_full($!gck, $wrapper, $mechanism, $wrapped, $n_result, $cancellable, $error);
+  }
+
 }
