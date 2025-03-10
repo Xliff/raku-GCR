@@ -11,12 +11,12 @@ our enum GckBuilderFlagsEnum is export <
 >;
 
 constant GckSessionOptions is export := guint32;
-our enum GckSessionOptionsEnum is export <
-  GCK_SESSION_READ_ONLY
-  GCK_SESSION_READ_WRITE
-  GCK_SESSION_LOGIN_USER
-  GCK_SESSION_AUTHENTICATE
->;
+our enum GckSessionOptionsEnum is export (
+  GCK_SESSION_READ_ONLY    => 0,
+  GCK_SESSION_READ_WRITE   => 1 +< 1,
+  GCK_SESSION_LOGIN_USER   => 1 +< 2,
+  GCK_SESSION_AUTHENTICATE => 1 +< 3
+);
 
 constant GckUriError is export := guint32;
 our enum GckUriErrorEnum is export <
