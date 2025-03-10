@@ -18,7 +18,7 @@ class GCK::Session {
   has GckSession $!gs is implementor;
 
   multi method new ($slot, $session_handle, $options) {
-    self.fro_handle($slot, $session_handle, $options)
+    self.from_handle($slot, $session_handle, $options)
   }
   method from_handle (
     GckSlot() $slot,
@@ -547,16 +547,103 @@ class GCK::Session {
     gck_session_encrypt($!gs, $key, $mech_type, $input, $n_input, $n_result, $cancellable, $error);
   }
 
-  method encrypt_async (
-    GckObject           $key,
-    GckMechanism        $mechanism,
-    Str                 $input,
-    gsize               $n_input,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+  proto method encrypt_async (|)
+  { * }
+
+  multi method encrypt_async (
+          $key,
+          $mechanism,
+     Str  $input,
+          &callback,
+          $user_data   = gpointer,
+         :$cancellable = GCancellable,
+         :$encoding    = 'utf8'
   ) {
-    gck_session_encrypt_async($!gs, $key, $mechanism, $input, $n_input, $cancellable, $callback, $user_data);
+    samewith(
+      $key,
+      $mechanism,
+      $input.encode($encoding),
+      $cancellable,
+      &callback,
+      $user_data
+    )
+  }
+  multi method encrypt_async (
+           $key,
+           $mechanism,
+     Blob  $input,
+           &callback,
+           $user_data   = gpointer,
+          :$cancellable = GCancellable
+  ) {
+    samewith(
+      $key,
+      $mechanism,
+      CArray[uint8].new($input),
+      $input.bytes,
+      $cancellable,
+      &callback,
+      $user_data
+    )
+  }
+  multi method encrypt_async (
+     $key,
+     $mechanism,
+     @input,
+     &callback,
+     $user_data   = gpointer,
+    :$cancellable = GCancellable
+  ) {
+    samewith(
+      $key,
+      $mechanism,
+      ArrayToCArray(@input, typed => uint8),
+      @input.elems,
+      $cancellable,
+      &callback,
+      $user_data
+    )
+  }
+  multi method encrypt_async (
+                   $key,
+                   $mechanism,
+    CArray[uint8]  $input,
+                   $n_input,
+                   &callback,
+                   $user_data   = gpointer,
+                  :$cancellable = GCancellable
+  ) {
+    samewith(
+      $key,
+      $mechanism,
+      $input,
+      $n_input,
+      $cancellable,
+      &callback,
+      $user_data
+    )
+  }
+  multi method encrypt_async (
+    GckObject()    $key,
+    GckMechanism() $mechanism,
+    CArray[uint8]  $input,
+    Int()          $n_input,
+    GCancellable() $cancellable,
+                   &callback,
+    gpointer       $user_data    = gpointer
+  ) {
+    my $ni = $n_input;
+
+    gck_session_encrypt_async(
+      $!gs,
+      $key,
+      $mechanism,
+      $input,
+      $ni,
+      $cancellable,
+      &callback,
+      $user_data
+    );
   }
 
   proto method encrypt_finish (|)
@@ -564,15 +651,16 @@ class GCK::Session {
 
   multi method encrypt_finish (
      $result,
-     $error            = gerror
+     $error            = gerror,
     :$raw              = False,
     :$buf              = False
   ) {
-    samewith(
+    samewith($result, $, $error, :$raw, :$buf);
+  }
   multi method encrypt_finish (
     GAsyncResult()           $result,
                              $n_result is rw,
-    CArray[Pointer[GError]]  $error            = gerror
+    CArray[Pointer[GError]]  $error            = gerror,
                             :$raw              = False,
                             :$buf              = False
   ) {
@@ -582,10 +670,10 @@ class GCK::Session {
     my $r = gck_session_encrypt_finish($!gs, $result, $n, $error);
     $n_result = $n;
 
-    my $r = ($r, $n);
+    $r = ($r, $n);
     return $r if $raw;
 
-    $r = SizedCArray.new( |$r )
+    $r = SizedCArray.new( |$r );
     return $r unless $buf;
 
     Buf[uint8].new($r);
@@ -638,15 +726,15 @@ class GCK::Session {
     :$raw                 = False,
     :$cancellable         = GCancellable
   ) {
-    samewith(
-       $key
-       $mechanism,
-       ArrayToCArray( @input, typed => uint8 ),
-       @input.elems,
-       $cancellable,
-       $error,
-      :$raw
-    );
+    # samewith(
+    #    $key
+    #    $mechanism,
+    #    ArrayToCArray( @input, typed => uint8 ),
+    #    @input.elems,
+    #    $cancellable,
+    #    $error,
+    #   :$raw
+    # );
   }
   multi method encrypt_full (
                    $key,
@@ -838,26 +926,29 @@ class GCK::Session {
      $error          = gerror,
     :$public_key     = newCArray(GckObject),
     :$private_key    = newCArray(GckObject),
-    :$cancellable    = GCancellable
+    :$cancellable    = GCancellable,
+    :$raw            = False
   ) {
     samewith(
-      $mech_type,
-      $public_attrs,
-      $private_attrs,
-      $public_key,
-      $private_key,
-      $cancellable,
-      $error
+       $mech_type,
+       $public_attrs,
+       $private_attrs,
+       $public_key,
+       $private_key,
+       $cancellable,
+       $error,
+      :$raw
     );
   }
   multi method generate_key_pair (
-    Int()                   $mech_type,
-    GckAttributes()         $public_attrs,
-    GckAttributes()         $private_attrs,
-    CArray[GckObject]       $public_key     = newCArray(GckObject),
-    CArray[GckObject]       $private_key    = newCArray(GckObject),
-    GCancellable()          $cancellable    = GCancellable,
-    CArray[Pointer[GError]] $error          = gerror`
+    Int()                    $mech_type,
+    GckAttributes()          $public_attrs,
+    GckAttributes()          $private_attrs,
+    CArray[GckObject]        $public_key     = newCArray(GckObject),
+    CArray[GckObject]        $private_key    = newCArray(GckObject),
+    GCancellable()           $cancellable    = GCancellable,
+    CArray[Pointer[GError]]  $error          = gerror,
+                            :$raw            = False
   ) {
     my gulong $m = $mech_type;
 
@@ -877,15 +968,15 @@ class GCK::Session {
     return Nil unless $r;
 
     return (
-      propReturnObject( ppr($public_key), $raw, |GCK::Object.getTypePair )
-      propReturnObject( ppr($rivate_key), $raw, |GCK::Object.getTypePair )
+      propReturnObject( ppr($public_key),  $raw, |GCK::Object.getTypePair ),
+      propReturnObject( ppr($private_key), $raw, |GCK::Object.getTypePair )
     )
   }
 
   proto method generate_key_pair_async (|)
   { * }
 
-  method generate_key_pair_async (
+  multi method generate_key_pair_async (
      $mechanism,
      $public_attrs,
      $private_attrs,
@@ -901,14 +992,14 @@ class GCK::Session {
       &callback,
       $user_data
     )
-  |
-  method generate_key_pair_async (
-    GckMechanism()      $mechanism,
-    GckAttributes()     $public_attrs,
-    GckAttributes()     $private_attrs,
-    GCancellable()      $cancellable,
-                        &callback,
-    gpointer            $user_data       = gpointer
+  }
+  multi method generate_key_pair_async (
+    GckMechanism()  $mechanism,
+    GckAttributes() $public_attrs,
+    GckAttributes() $private_attrs,
+    GCancellable()  $cancellable,
+                    &callback,
+    gpointer        $user_data       = gpointer
   ) {
     gck_session_generate_key_pair_async(
       $!gs,
@@ -916,7 +1007,7 @@ class GCK::Session {
       $public_attrs,
       $private_attrs,
       $cancellable,
-      $callback,
+      &callback,
       $user_data
     );
   }
@@ -928,18 +1019,20 @@ class GCK::Session {
      $result,
      $error        = gerror,
     :$public_key   = newCArray(GckObject),
-    :$private_key  = newCArray(GckObject)
+    :$private_key  = newCArray(GckObject),
+    :$raw          = False
   ) {
-    samewith($result, $public_key, $private_key, $error);
+    samewith($result, $public_key, $private_key, $error, :$raw);
   }
   multi method generate_key_pair_finish (
-    GAsyncResult()          $result,
-    CArray[GckObject]       $public_key   = newCArray(GckObject),
-    CArray[GckObject]       $private_key  = newCArray(GckObject),
-    CArray[Pointer[GError]] $error        = gerror
+    GAsyncResult()           $result,
+    CArray[GckObject]        $public_key   = newCArray(GckObject),
+    CArray[GckObject]        $private_key  = newCArray(GckObject),
+    CArray[Pointer[GError]]  $error        = gerror,
+                            :$raw          = False
   ) {
     clear_error;
-    ny $r = gck_session_generate_key_pair_finish(
+    my $r = gck_session_generate_key_pair_finish(
       $!gs,
       $result,
       $public_key,
@@ -951,8 +1044,8 @@ class GCK::Session {
     return Nil unless $r;
 
     return (
-      propReturnObject( ppr($public_key), $raw, |GCK::Object.getTypePair )
-      propReturnObject( ppr($rivate_key), $raw, |GCK::Object.getTypePair )
+      propReturnObject( ppr($public_key),  $raw, |GCK::Object.getTypePair ),
+      propReturnObject( ppr($private_key), $raw, |GCK::Object.getTypePair )
     )
   }
 
@@ -963,11 +1056,10 @@ class GCK::Session {
      $mechanism,
      $public_attrs,
      $private_attrs,
-     $error           = gerror
-    :$cancellable     = GCancellable,,
+     $error           = gerror,
+    :$cancellable     = GCancellable,
     :$public_key      = newCArray(GckObject),
-    :$private_key     = newCArray(GckObj  }a
-ect)
+    :$private_key     = newCArray(GckObject)
   ) {
     samewith(
       $mechanism,
@@ -979,14 +1071,15 @@ ect)
       $error
     );
   }
-  nmulti method generate_key_pair_full (
-    GckMechanism()          $mechanism,
-    GckAttributes()         $public_attrs,
-    GckAttributes()         $private_attrs,
-    CArray[GckObject]       $public_key,
-    CArray[GckObject]       $private_key,
-    GCancellable()          $cancellable     = GCancellable,
-    CArray[Pointer[GError]] $error           = gerror
+  multi method generate_key_pair_full (
+    GckMechanism()           $mechanism,
+    GckAttributes()          $public_attrs,
+    GckAttributes()          $private_attrs,
+    CArray[GckObject]        $public_key,
+    CArray[GckObject]        $private_key,
+    GCancellable()           $cancellable    = GCancellable,
+    CArray[Pointer[GError]]  $error          = gerror,
+                            :$raw            = False
   ) {
     clear_error;
     my $r = gck_session_generate_key_pair_full(
@@ -1004,8 +1097,8 @@ ect)
     return Nil unless $r;
 
     return (
-      propReturnObject( ppr($public_key), $raw, |GCK::Object.getTypePair )
-      propReturnObject( ppr($rivate_key), $raw, |GCK::Object.getTypePair )
+      propReturnObject( ppr($public_key),  $raw, |GCK::Object.getTypePair ),
+      propReturnObject( ppr($private_key), $raw, |GCK::Object.getTypePair )
     )
   }
 
