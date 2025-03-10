@@ -535,16 +535,120 @@ class GCK::Session {
     propReturnObject($r, $raw, |GCK::Object.getTypePair);
   }
 
-  method encrypt (
-    GckObject               $key,
-    gulong                  $mech_type,
-    Str                     $input,
-    gsize                   $n_input,
-    gsize                   $n_result,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+  multi method encrypt (
+          $key,
+          $mech_type,
+    Str   $input,
+          $error               = gerror,
+         :$cancellable         = GCancellable,
+         :$raw                 = False,
+         :$buf                 = False,
+         :$encoding            = 'utf8',
   ) {
-    gck_session_encrypt($!gs, $key, $mech_type, $input, $n_input, $n_result, $cancellable, $error);
+    samewith(
+       $key,
+       $mech_type,
+       $input.encode($encoding),
+       $error,
+      :$cancellable,
+      :$raw,
+      :$buf
+    );
+  }
+  multi method encrypt (
+          $key,
+          $mech_type,
+    Blob  $input,
+          $error               = gerror,
+         :$cancellable         = GCancellable,
+         :$raw                 = False,
+         :$buf                 = False
+  ) {
+    samewith(
+       $key,
+       $mech_type,
+       CArray[uint8].new($input),
+       $input.bytes,
+       $error,
+      :$cancellable,
+      :$raw,
+      :$buf
+    );
+  }
+  multi method encrypt (
+     $key,
+     $mech_type,
+     @input,
+     $error               = gerror,
+    :$cancellable         = GCancellable,
+    :$raw                 = False,
+    :$buf                 = False
+  ) {
+    samewith(
+       $key,
+       $mech_type,
+       CArray[uint8].new(@input),
+       @input.elems,
+       $error,
+      :$cancellable,
+      :$raw,
+      :$buf
+    );
+  }
+  multi method encrypt (
+    GckObject()              $key,
+    Int()                    $mech_type,
+    CArray[uint8]            $input,
+    Int()                    $n_input,
+    CArray[Pointer[GError]]  $error               = gerror,
+    GCancellable()          :$cancellable         = GCancellable,
+                            :$raw                 = False,
+                            :$buf                 = False
+  ) {
+    samewith(
+      $key,
+      $mech_type,
+      $input,
+      $n_input,
+      $cancellable,
+      $error
+    );
+  }
+  multi method encrypt (
+    GckObject()              $key,
+    Int()                    $mech_type,
+    CArray[uint8]            $input,
+    Int()                    $n_input,
+                             $n_result     is rw,
+    GCancellable()           $cancellable         = GCancellable,
+    CArray[Pointer[GError]]  $error               = gerror,
+                            :$raw                 = False,
+                            :$buf                 = False
+  ) {
+    my gulong  $m        =  $mech_type,
+    my gsize  ($ni, $nr) = ($n_input, 0);
+
+    clear_error;
+    my $r = gck_session_encrypt(
+      $!gs,
+      $key,
+      $mech_type,
+      $input,
+      $ni,
+      $nr,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $n_result = $nr;
+
+    $r = ($r, $nr);
+    return $r if $raw;
+
+    $r = SizedCArray.new( |$r );
+    return $r unless $buf;
+
+    Buf[uint8].new($r);
   }
 
   proto method encrypt_async (|)
