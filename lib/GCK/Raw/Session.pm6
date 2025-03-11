@@ -612,7 +612,7 @@ sub gck_session_sign (
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -637,7 +637,7 @@ sub gck_session_sign_finish (
   gsize                   $n_result is rw,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -652,7 +652,7 @@ sub gck_session_sign_full (
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
