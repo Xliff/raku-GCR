@@ -172,8 +172,8 @@ class GCK::Session {
     CArray[Pointer[GError]]  $error              = gerror,
                             :$raw                = False
   ) {
-    my gulong $m  = $mech_type,
-    my gsize  $ni = $n_input,
+    my gulong $m  = $mech_type;
+    my gsize  $ni = $n_input;
     my gsize  $no = 0;
 
     my $r = gck_session_decrypt(
@@ -1735,16 +1735,87 @@ class GCK::Session {
     $r;
   }
 
-  method set_pin_async (
-    Str                 $old_pin,
-    gsize               $n_old_pin,
-    Str                 $new_pin,
-    gsize               $n_new_pin,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+  proto method set_pin_async (|)
+  { * }
+
+  multi method set_pin_async (
+     $new_pin,
+     &callback,
+     $error                                               = gerror,
+    :new_pin_size(:new-pin-size(:n-new-pin(:$n_new_pin))) = $new_pin.chars,
+    :$cancellable = GCancellable,
+
+    :no_old_pin($no-old-pin) is required where *.so
   ) {
-    gck_session_set_pin_async($!gck, $old_pin, $n_old_pin, $new_pin, $n_new_pin, $cancellable, $callback, $user_data);
+    samewith(
+       Str,
+       $new_pin,
+       &callback,
+       $error,
+      :$n_new_pin
+      :n_old_pin(0)
+      :$cancellable
+    )
+  }
+  multi method set_pin_async (
+     $old_pin,
+     &callback,
+     $error                                               = gerror,
+    :old_pin_size(:old-pin_size(:n-old-pin(:$n_old_pin))) = $old_pin.chars,
+    :$cancellable = GCancellable,
+
+    :no_new_pin($no-new-pin) is required where *.so
+  ) {
+    samewith(
+       $old_pin,
+       Str,
+       &callback,
+       $error,
+      :$n_old_pin
+      :n_new_pin(0)
+      :$cancellable
+    )
+  }
+  multi method set_pin (
+     $old_pin,
+     $new_pin,
+     &callback,
+     $error                                               = gerror,
+    :old_pin_size(:old-pin_size(:n-old-pin(:$n_old_pin))) = $old_pin.chars,
+    :new_pin_size(:new-pin-size(:n-new-pin(:$n_new_pin))) = $new_pin.chars,
+    :$cancellable = GCancellable,
+  ) {
+    samewith(
+      $old_pin,
+      $n_old_pin,
+      $new_pin,
+      $n_new_pin,
+      $cancellable,
+      &callback,
+      $error
+    )
+  }
+  multi method set_pin_async (
+    Str()          $old_pin,
+    Int()          $n_old_pin,
+    Str()          $new_pin,
+    Int()          $n_new_pin,
+    GCancellable() $cancellable,
+                   &callback,
+    gpointer       $user_data     = gpointer
+  ) {
+    my gsize ($o, $n) = ($n_old_pin, $n_new_pin);
+
+    gck_session_set_pin_async(
+      $!gck,
+      $old_pin,
+      $o,
+      $new_pin,
+      $n,
+      $cancellable,
+      &callback,
+      $user_data
+    );
   }
 
   method set_pin_finish (
@@ -1757,92 +1828,378 @@ class GCK::Session {
     $r;
   }
 
-  method sign (
-    GckObject               $key,
-    gulong                  $mech_type,
-    Str                     $input,
-    gsize                   $n_input,
-    gsize                   $n_result     is rw,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+
+  multi method sign (
+    GckObject()              $key,
+    Int()                    $mech_type,
+    Blob                     $input,
+    GCancellable()           $cancellable          = GCancellable,
+    CArray[Pointer[GError]]  $error                = gerror,
+                            :$raw                  = False,
+                            :$buf                  = True
   ) {
-    gck_session_sign($!gck, $key, $mech_type, $input, $n_input, $n_result, $cancellable, $error);
+    samewith(
+        $key,
+        $mech_type,
+        CArray[uint8].new($input),
+        $input.bytes,
+        $
+        $cancellable
+        $error
+      :$raw
+      :$buf
+    );
+  }
+  multi method sign (
+    GckObject()              $key,
+    Int()                    $mech_type,
+    CArray[uint8]            $input,
+    Int()                    $n_input,
+                             $n_result     is rw,
+    GCancellable()           $cancellable          = GCancellable,
+    CArray[Pointer[GError]]  $error                = gerror,
+                            :$raw                  = False,
+                            :$buf                  = True
+  ) {
+    my gulong  $m      = $mech_type;
+    my gsize  ($i, $r) = ($n_input, 0);
+
+    clear_error;
+    my $o = gck_session_sign(
+      $!gck,
+      $key,
+      $m,
+      $input,
+      $i,
+      $r,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+
+    $n_result = $r,
+    return ($o, $nr) if $raw;
+    my $ca = SizedCArray.new($o, $nr);
+    return $ca unless $buf;
+    Buf[uint8].new($ca);
   }
 
-  method sign_async (
-    GckObject           $key,
-    GckMechanism        $mechanism,
-    Str                 $input,
-    gsize               $n_input,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+  proto method sign_async (|)
+  { * }
+
+  multi method sign_async (
+          $key,
+          $mechanism,
+    Buf   $input,
+          &callback,
+          $user_data   = gpointer
+         :$cancellable = GCancellable
   ) {
-    gck_session_sign_async($!gck, $key, $mechanism, $input, $n_input, $cancellable, $callback, $user_data);
+    samewith(
+      $key,
+      $mechanism,
+      CArray[uint8].new($input),
+      $input.bytes,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  multi method sign_async (
+                   $key,
+                   $mechanism,
+    CArray[uint8]  $input,
+                   $n_input,
+                   &callback,
+                   $user_data   = gpointer
+                  :$cancellable = GCancellable
+  ) {
+    samewith(
+      $key,
+      $mechanism,
+      $input,
+      $n_input,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  multi method sign_async (
+    GckObject()         $key,
+    GckMechanism()      $mechanism,
+    CArray[uin8]        $input,
+    Int()               $n_input,
+    GCancellable()      $cancellable,
+                        &callback,
+    gpointer            $user_data     = gpointer
+  ) {
+    my gsize $ni = $n_input;
+
+    gck_session_sign_async(
+      $!gck,
+      $key,
+      $mechanism,
+      $input,
+      $n_input,
+      $cancellable,
+      &callback,
+      $user_data
+    );
   }
 
   method sign_finish (
-    GAsyncResult            $result,
-    gsize                   $n_result,
-    CArray[Pointer[GError]] $error
+    GAsyncResult()           $result,
+                             $n_result is rw,
+    CArray[Pointer[GError]]  $error           = gerror,
+                            :$raw             = False,
+                            :$buf             = True
   ) {
-    gck_session_sign_finish($!gck, $result, $n_result, $error);
+    my gsize $nr = 0;
+
+    clear_error;
+    my $r = gck_session_sign_finish($!gck, $result, $nr, $error);
+    set_error($error);
+    $n_result = $nr;
+    return ($o, $nr) if $raw;
+    my $ca = SizedCArray.new($o, $nr);
+    return $ca unless $buf;
+    Buf[uint8].new($ca);
   }
 
-  method sign_full (
-    GckObject               $key,
-    GckMechanism            $mechanism,
-    Str                     $input,
-    gsize                   $n_input,
-    gsize                   $n_result     is rw,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+  proto method sign_full (|)
+  { * }
+
+  multi method sign_full (
+         $key,
+         $mechanism,
+    Buf  $input,
+         $error               = gerror,
+        :$raw                 = False,
+        :$buf                 = True
+        :$cancellable         = GCancellable,
+   ) {
+    samewith(
+       $key,
+       $mechanism,
+       CArray[uint8].new($input),
+       $input.bytes,
+       $,
+       $cancellable,
+       $error,
+      :$raw,
+      :$buf
+    );
+  }
+  multi method sign_full (
+    GckObject()              $key,
+    GckMechanism()           $mechanism,
+    CArray[uint8]            $input,
+    Int()                    $n_input,
+                             $n_result     is rw,
+    GCancellable()           $cancellable         = GCancellable,
+    CArray[Pointer[GError]]  $error               = gerror,
+                            :$raw                 = False,
+                            :$buf                 = True
   ) {
-    gck_session_sign_full($!gck, $key, $mechanism, $input, $n_input, $n_result, $cancellable, $error);
+    my gsize  ($i, $r) = ($n_input, 0);
+
+    clear_error;
+    my $o = gck_session_sign_full(
+      $!gck,
+      $key,
+      $mechanism,
+      $input,
+      $i,
+      $r,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+
+    $n_result = $r;
+    return ($o, $r) if $raw;
+    my $ca = SizedCArray.new($o, $nr);
+    return $ca unless $buf;
+    Buf[uint8].new($ca);
   }
 
+  proto method unwrap_key (|)
+  { * }
+
+  multi method unwrap_key (
+           $wrapper,
+           $mech_type,
+    Buf    $input,
+           $attrs,
+           $error        = gerror,
+          :$raw          = False,
+          :$cancellable  = GCancellable
+  ) {
+    samewith(
+      $wrapper,
+      $mech_type,
+      CAray[uint8].new($input),
+      $input.bytes,
+      $attrs,
+      $cancellable,
+      $error
+    )
+  }
   method unwrap_key (
-    GckObject               $wrapper,
-    gulong                  $mech_type,
-    Str                     $input,
-    gsize                   $n_input,
-    GckAttributes           $attrs,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+    GckObject()              $wrapper,
+    Int()                    $mech_type,
+    CArray[uint8]            $input,
+    Int()                    $n_input,
+    GckAttributes()          $attrs,
+    GCancellable()           $cancellable  = GCancellable,
+    CArray[Pointer[GError]]  $error        = gerror,
+                            :$raw          = False
   ) {
-    gck_session_unwrap_key($!gck, $wrapper, $mech_type, $input, $n_input, $attrs, $cancellable, $error);
+    my gulong $m = $mech_type;
+    my gsize  $i = $n_input;
+
+    clear_error;
+    my $r = gck_session_unwrap_key(
+      $!gck,
+      $wrapper,
+      $m,
+      $input,
+      $i,
+      $attrs,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    propReturnObject($r, $raw, |GCK::Object.getTypePair);
   }
+
+  proto method unwrap_key_async (|)
+  { * }
 
   method unwrap_key_async (
-    GckObject           $wrapper,
-    GckMechanism        $mechanism,
-    Str                 $input,
-    gsize               $n_input,
-    GckAttributes       $attrs,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+         $wrapper,
+         $mechanism,
+    Buf  $input,
+         $attrs,
+         &callback,
+         $user_data     = gpointer
+        :$cancellable,
   ) {
-    gck_session_unwrap_key_async($!gck, $wrapper, $mechanism, $input, $n_input, $attrs, $cancellable, $callback, $user_data);
+    samewith(
+       $wrapper,
+       $mechanism,
+       CArray[uint8].new($input),
+       $input.bytes,
+       $attrs,
+       &callback,
+       $user_data,
+      :$cancellable,
+    );
+  }
+  method unwrap_key_async (
+                   $wrapper,
+                   $mechanism,
+    CArray[uint8]  $input,
+                   $attrs,
+                   &callback,
+                   $user_data   = gpointer,
+                  :$cancellable = GCancellable
+  ) {
+    samewith(
+      $wrapper,
+      $mechanism,
+      $input,
+      $n_input,
+      $attrs,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  method unwrap_key_async (
+    GckObject()      $wrapper,
+    GckMechanism()   $mechanism,
+    CArray[uint8]    $input,
+    Int()            $n_input,
+    GckAttributes()  $attrs,
+    GCancellable()   $cancellable,
+                     &callback,
+    gpointer         $user_data     = gpointer
+  ) {
+    my gsize $i = $n_input;
+
+    gck_session_unwrap_key_async(
+      $!gck,
+      $wrapper,
+      $mechanism,
+      $input,
+      $i,
+      $attrs,
+      $cancellable,
+      &callback,
+      $user_data
+    );
   }
 
   method unwrap_key_finish (
-    GAsyncResult            $result,
-    CArray[Pointer[GError]] $error
+    GAsyncResult()           $result,
+    CArray[Pointer[GError]]  $error   = gerror,
+                            :$raw     = False
   ) {
-    gck_session_unwrap_key_finish($!gck, $result, $error);
+    clear_error;
+    my $o = gck_session_unwrap_key_finish($!gck, $result, $error);
+    set_error($error);
+    propReturnObject($o, $raw, |GCK::Object.getTypePair);
   }
 
-  method unwrap_key_full (
-    GckObject               $wrapper,
-    GckMechanism            $mechanism,
-    Str                     $input,
-    gsize                   $n_input,
-    GckAttributes           $attrs,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+  proto method unwrap_key_full (|)
+  { * }
+
+  multi method unwrap_key_full (
+            $wrapper,
+            $mechanism,
+      Blob  $input,
+            $attrs,
+            $error       = gerror,
+           :$raw         = False
+           :$cancellable = GCancellable,
   ) {
-    gck_session_unwrap_key_full($!gck, $wrapper, $mechanism, $input, $n_input, $attrs, $cancellable, $error);
+    samewith(
+       $wrapper,
+       $mechanism,
+       CArray[uint8].new($input),
+       $input.bytes,
+       $attrs,
+       $cancellable,
+       $error
+      :$raw
+    );l
+  }
+  multi method unwrap_key_full (
+    GckObject()              $wrapper,
+    GckMechanism()           $mechanism,
+    CArray[uint8]            $input,
+    Int()                    $n_input,
+    GckAttributes()          $attrs,
+    GCancellable()           $cancellable = GCancellable,
+    CArray[Pointer[GError]]  $error       = gerror,
+                            :$raw         = False
+  ) {
+    my gsize $i = $n_input;
+
+    clear_error;
+    my $o = gck_session_unwrap_key_full(
+      $!gck,
+      $wrapper,
+      $mechanism,
+      $input,
+      $i,
+      $attrs,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    propReturnObject($o, $raw, |GCK::Object.getTypePair);
   }
 
   method verify (
