@@ -2173,7 +2173,7 @@ class GCK::Session {
        $cancellable,
        $error
       :$raw
-    );l
+    );
   }
   multi method unwrap_key_full (
     GckObject()              $wrapper,
@@ -2202,51 +2202,195 @@ class GCK::Session {
     propReturnObject($o, $raw, |GCK::Object.getTypePair);
   }
 
-  method verify (
-    GckObject               $key,
-    gulong                  $mech_type,
-    Str                     $input,
-    gsize                   $n_input,
-    Str                     $signature,
-    gsize                   $n_signature,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
-  ) {
-    gck_session_verify($!gck, $key, $mech_type, $input, $n_input, $signature, $n_signature, $cancellable, $error);
+  sub getBufferSize ($_) {
+    when Str           { $input.chars }
+    when Blob          { $input.bytes }
+
+    when CArray[uint8] {
+      CATCH {
+        default {
+          X::GLib::CArrayUnknownSize.new.throw
+            if .message.contains( q<Don't know how many elements> );
+        }
+      }
+      $input.elems
+    }
   }
 
-  method verify_async (
-    GckObject           $key,
-    GckMechanism        $mechanism,
-    Str                 $input,
-    gsize               $n_input,
-    Str                 $signature,
-    gsize               $n_signature,
-    GCancellable        $cancellable,
-    GAsyncReadyCallback $callback,
-    gpointer            $user_data
+  multi method verify (
+    $key,
+    $mech_type,
+    $input,
+    $signature,
+    $cancellable           = GCancellable,
+    $error                 = gerror,
+
+    :input_size(:input-size(:n-input(:$n_input)))     is copy,
+    :sig_size(:sig-size(:n-signature(:$n_signature))) is copy,
   ) {
-    gck_session_verify_async($!gck, $key, $mechanism, $input, $n_input, $signature, $n_signature, $cancellable, $callback, $user_data);
+    $n_input     //= getBufferSize($input);
+    $n_signature //= getBufferSize($signature);
+
+    samewith(
+      $key,
+      $mech_type,
+      resolveBuffer($input),
+      $n_input,
+      resolveBuffer($signature),
+      $n_signature,
+      $cancellable,
+      $error
+    )
+  }
+  multi method verify (
+    GckObject()             $key,
+    Int()                   $mech_type,
+    CArray[uint8]           $input,
+    Int()                   $n_input,
+    CArray[uint8]           $signature,
+    Int()                   $n_signature,
+    GCancellable()          $cancellable  = GCancellable,
+    CArray[Pointer[GError]] $error        = gerror
+  ) {
+    my gulong  $m         =  $mech_type;
+    my gsize  ($ni, $ns)  = ($n_input, $n_signature);
+
+    clear_error;
+    my $r = so gck_session_verify(
+      $!gck,
+      $key,
+      $mech_type,
+      $input,
+      $ni,
+      $signature,
+      $n_signature,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r;
+  }
+
+  proto multi method verify_async (|)
+  { * }
+
+  multi method verify_async (
+    GckObject()     $key,
+    Int()           $mech_type,
+                    $input,
+                    $signature,
+                    &callback,
+    gpointer        $user_data   = gpointer,
+    GCancellable() :$cancellable = GCancellable,
+
+    :input_size(:input-size(:n-input(:$n_input)))     is copy,
+    :sig_size(:sig-size(:n-signature(:$n_signature))) is copy,
+  ) {
+    $n_input     //= getBufferSize($input);
+    $n_signature //= getBufferSize($signature);
+
+    samewith(
+      $key,
+      $mech_type,
+      resolveBuffer($input),
+      $n_input,
+      resolveBuffer($signature),
+      $n_signature,
+      $cancellable,
+      &callback,
+      $error
+    )
+  }
+  multi method verify_async (
+    GckObject()             $key,
+    Int()                   $mech_type,
+    CArray[uint8]           $input,
+    Int()                   $n_input,
+    CArray[uint8]           $signature,
+    Int()                   $n_signature,
+    GCancellable()          $cancellable,
+                            &callback,
+    gpointer                $user_data    = gpointer
+  ) {
+    my gulong  $m         =  $mech_type;
+    my gsize  ($ni, $ns)  = ($n_input, $n_signature);
+
+    gck_session_verify_async(
+      $!gck,
+      $key,
+      $mechanism,
+      $input,
+      $ni,
+      $signature,
+      $ns,
+      $cancellable,
+      $callback,
+      $user_data
+    );
   }
 
   method verify_finish (
-    GAsyncResult            $result,
-    CArray[Pointer[GError]] $error
+    GAsyncResult()          $result,
+    CArray[Pointer[GError]] $error    = gerror
   ) {
-    gck_session_verify_finish($!gck, $result, $error);
+    clear_error;
+    my $r = so gck_session_verify_finish($!gck, $result, $error);
+    set_error($error);
   }
 
-  method verify_full (
-    GckObject               $key,
-    GckMechanism            $mechanism,
-    Str                     $input,
-    gsize                   $n_input,
-    Str                     $signature,
-    gsize                   $n_signature,
-    GCancellable            $cancellable,
-    CArray[Pointer[GError]] $error
+  proto multi method verify_full (|)
+
+  multi method verify_full (
+    $key,
+    $mechanism,
+    $input,
+    $signature,
+    $cancellable           = GCancellable,
+    $error                 = gerror,
+
+    :input_size(:input-size(:n-input(:$n_input)))     is copy,
+    :sig_size(:sig-size(:n-signature(:$n_signature))) is copy,
   ) {
-    gck_session_verify_full($!gck, $key, $mechanism, $input, $n_input, $signature, $n_signature, $cancellable, $error);
+    $n_input     //= getBufferSize($input);
+    $n_signature //= getBufferSize($signature);
+
+    samewith(
+      $key,
+      $mechanism,
+      resolveBuffer($input),
+      $n_input,
+      resolveBuffer($signature),
+      $n_signature,
+      $cancellable,
+      $error
+    )
+  }
+  multi method verify_full (
+    GckObject()             $key,
+    GckMechanism()          $mechanism,
+    CArray[uint8]           $input,
+    Int()                   $n_input,
+    CArray[uint8]           $signature,
+    Int()                   $n_signature,
+    GCancellable()          $cancellable  = GCancellable,
+    CArray[Pointer[GError]] $error        = gerror
+  ) {
+    my gsize  ($ni, $ns)  = ($n_input, $n_signature);
+
+    clear_error;
+    my $r = so gck_session_verify_full(
+      $!gck,
+      $key,
+      $mechanism,
+      $input,
+      $ni,
+      $signature,
+      $ns,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r;
   }
 
   method wrap_key (
