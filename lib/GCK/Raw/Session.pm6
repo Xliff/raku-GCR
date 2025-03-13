@@ -22,11 +22,11 @@ sub gck_session_create_object (
 { * }
 
 sub gck_session_create_object_async (
-  GckSession          $self,
-  GckAttributes       $attrs,
-  GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
-  gpointer            $user_data
+  GckSession     $self,
+  GckAttributes  $attrs,
+  GCancellable   $cancellable,
+                 &callback (GckSession, GAsyncResult, gpointer),
+  gpointer       $user_data
 )
   is      native(gcr)
   is      export
@@ -52,7 +52,7 @@ sub gck_session_decrypt (
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -64,7 +64,7 @@ sub gck_session_decrypt_async (
   CArray[uint8]       $input,
   gsize               $n_input,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -116,7 +116,7 @@ sub gck_session_derive_key_async (
   GckMechanism        $mechanism,
   GckAttributes       $attrs,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -150,7 +150,7 @@ sub gck_session_encrypt (
   GckSession              $self,
   GckObject               $key,
   gulong                  $mech_type,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
   gsize                   $n_result is rw,
   GCancellable            $cancellable,
@@ -165,10 +165,10 @@ sub gck_session_encrypt_async (
   GckSession          $self,
   GckObject           $key,
   GckMechanism        $mechanism,
-  Str                 $input,
+  CArray[uint8]       $input,
   gsize               $n_input,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -190,7 +190,7 @@ sub gck_session_encrypt_full (
   GckSession              $self,
   GckObject               $key,
   GckMechanism            $mechanism,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
   gsize                   $n_result is rw,
   GCancellable            $cancellable,
@@ -226,7 +226,7 @@ sub gck_session_find_handles_async (
   GckSession          $self,
   GckAttributes       $match,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -259,7 +259,7 @@ sub gck_session_find_objects_async (
   GckSession          $self,
   GckAttributes       $match,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -307,7 +307,7 @@ sub gck_session_generate_key_pair_async (
   GckAttributes       $public_attrs,
   GckAttributes       $private_attrs,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -406,7 +406,7 @@ sub gck_session_init_pin_async (
   Str                 $pin,
   gsize               $n_pin,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -442,7 +442,7 @@ sub gck_session_login_async (
   Str                 $pin,
   gsize               $n_pin,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -476,7 +476,7 @@ sub gck_session_login_interactive_async (
   gulong              $user_type,
   GTlsInteraction     $interaction,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -506,7 +506,7 @@ sub gck_session_logout (
 sub gck_session_logout_async (
   GckSession          $self,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -540,7 +540,7 @@ sub gck_session_open_async (
   GckSessionOptions   $options,
   GTlsInteraction     $interaction,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -585,7 +585,7 @@ sub gck_session_set_pin_async (
   Str                 $new_pin,
   gsize               $n_new_pin,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -606,7 +606,7 @@ sub gck_session_sign (
   GckSession              $self,
   GckObject               $key,
   gulong                  $mech_type,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
   gsize                   $n_result is rw,
   GCancellable            $cancellable,
@@ -621,10 +621,10 @@ sub gck_session_sign_async (
   GckSession          $self,
   GckObject           $key,
   GckMechanism        $mechanism,
-  Str                 $input,
+  CArray[uint8]       $input,
   gsize               $n_input,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -646,7 +646,7 @@ sub gck_session_sign_full (
   GckSession              $self,
   GckObject               $key,
   GckMechanism            $mechanism,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
   gsize                   $n_result is rw,
   GCancellable            $cancellable,
@@ -661,7 +661,7 @@ sub gck_session_unwrap_key (
   GckSession              $self,
   GckObject               $wrapper,
   gulong                  $mech_type,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
   GckAttributes           $attrs,
   GCancellable            $cancellable,
@@ -676,11 +676,11 @@ sub gck_session_unwrap_key_async (
   GckSession          $self,
   GckObject           $wrapper,
   GckMechanism        $mechanism,
-  Str                 $input,
+  CArray[uint8]       $input,
   gsize               $n_input,
   GckAttributes       $attrs,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -701,7 +701,7 @@ sub gck_session_unwrap_key_full (
   GckSession              $self,
   GckObject               $wrapper,
   GckMechanism            $mechanism,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
   GckAttributes           $attrs,
   GCancellable            $cancellable,
@@ -716,9 +716,9 @@ sub gck_session_verify (
   GckSession              $self,
   GckObject               $key,
   gulong                  $mech_type,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
-  Str                     $signature,
+  CArray[uint8]           $signature,
   gsize                   $n_signature,
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
@@ -732,12 +732,12 @@ sub gck_session_verify_async (
   GckSession          $self,
   GckObject           $key,
   GckMechanism        $mechanism,
-  Str                 $input,
+  CArray[uint8]       $input,
   gsize               $n_input,
-  Str                 $signature,
+  CArray[uint8]       $signature,
   gsize               $n_signature,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -758,9 +758,9 @@ sub gck_session_verify_full (
   GckSession              $self,
   GckObject               $key,
   GckMechanism            $mechanism,
-  Str                     $input,
+  CArray[uint8]           $input,
   gsize                   $n_input,
-  Str                     $signature,
+  CArray[uint8]           $signature,
   gsize                   $n_signature,
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
@@ -779,7 +779,7 @@ sub gck_session_wrap_key (
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -790,7 +790,7 @@ sub gck_session_wrap_key_async (
   GckMechanism        $mechanism,
   GckObject           $wrapped,
   GCancellable        $cancellable,
-  GAsyncReadyCallback $callback,
+                      &callback (GckSession, GAsyncResult, gpointer),
   gpointer            $user_data
 )
   is      native(gcr)
@@ -803,7 +803,7 @@ sub gck_session_wrap_key_finish (
   gsize                   $n_result is rw,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
@@ -817,7 +817,7 @@ sub gck_session_wrap_key_full (
   GCancellable            $cancellable,
   CArray[Pointer[GError]] $error
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
