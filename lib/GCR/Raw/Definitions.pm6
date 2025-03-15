@@ -24,6 +24,8 @@ class GcrCertificateField         is repr<CPointer> does GLib::Roles::Pointers i
 class GcrCertificateExtension     is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrCertificateExtensionList is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrCertificateSection       is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrImporter                 is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrParsed                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrPkcs11Certificate        is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrPrompt                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSecretExchange           is repr<CPointer> does GLib::Roles::Pointers is export { }
@@ -46,3 +48,23 @@ class GckSessionInfo is repr<CStruct> does GLib::Roles::Pointers is export {
   has gulong $.flags        is rw;
   has gulong $.device_error is rw;
 }
+
+constant GCR_DBUS_CALLBACK_INTERFACE        is export = 'org.gnome.keyring.internal.Prompter.Callback';
+constant GCR_DBUS_CALLBACK_METHOD_DONE      is export = 'PromptDone';
+constant GCR_DBUS_CALLBACK_METHOD_READY     is export = 'PromptReady';
+constant GCR_DBUS_PROMPT_ERROR_FAILED       is export = 'org.gnome.keyring.Prompter.Failed';
+constant GCR_DBUS_PROMPT_ERROR_IN_PROGRESS  is export = 'org.gnome.keyring.Prompter.InProgress';
+constant GCR_DBUS_PROMPT_OBJECT_PREFIX      is export = '/org/gnome/keyring/Prompt';
+constant GCR_DBUS_PROMPT_REPLY_NO           is export = 'no';
+constant GCR_DBUS_PROMPT_REPLY_NONE         is export = '';
+constant GCR_DBUS_PROMPT_REPLY_YES          is export = 'yes';
+constant GCR_DBUS_PROMPT_TYPE_CONFIRM       is export = 'confirm';
+constant GCR_DBUS_PROMPT_TYPE_PASSWORD      is export = 'password';
+constant GCR_DBUS_PROMPTER_INTERFACE        is export = 'org.gnome.keyring.internal.Prompter';
+constant GCR_DBUS_PROMPTER_METHOD_BEGIN     is export = 'BeginPrompting';
+constant GCR_DBUS_PROMPTER_METHOD_PERFORM   is export = 'PerformPrompt';
+constant GCR_DBUS_PROMPTER_METHOD_STOP      is export = 'StopPrompting';
+constant GCR_DBUS_PROMPTER_MOCK_BUS_NAME    is export = 'org.gnome.keyring.MockPrompter';
+constant GCR_DBUS_PROMPTER_OBJECT_PATH      is export = '/org/gnome/keyring/Prompter';
+constant GCR_DBUS_PROMPTER_PRIVATE_BUS_NAME is export = 'org.gnome.keyring.PrivatePrompter';
+constant GCR_DBUS_PROMPTER_SYSTEM_BUS_NAME  is export = 'org.gnome.keyring.SystemPrompter';
