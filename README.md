@@ -5,9 +5,7 @@ Raku bindings for Gnomes Certificate Handling library (GCR)
 Example:
 
 ```
-use GLib::Raw::Subs; 
-use GLib::Raw::Structs; 
-use GLib::Raw::Definitions; 
+use GCR::Raw::Types;
 use GCR::Parser; 
 
 my $c = <path to .crt file>.IO.slurp( :bin ); 
