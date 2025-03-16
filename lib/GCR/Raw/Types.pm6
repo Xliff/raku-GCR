@@ -24,7 +24,6 @@ need GIO::Raw::Structs;
 need GIO::Raw::Subs;
 need GIO::Raw::Quarks;
 need GIO::DBus::Raw::Types;
-need GCK::Raw::Structs;
 need GCR::Raw::Definitions;
 need GCR::Raw::OIDs;
 need GCR::Raw::Enums;
