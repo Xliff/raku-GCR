@@ -6,7 +6,6 @@ use GLib::Raw::Definitions;
 use GLib::Raw::Structs;
 use GIO::Raw::Definitions;
 use GCR::Raw::Definitions;
-use GCK::Raw::Structs;
 
 unit package GCK::Raw::Attribute;
 
@@ -50,9 +49,9 @@ sub gck_attribute_get_boolean (GckAttribute $attr)
 
 sub gck_attribute_get_data (
   GckAttribute $attr,
-  gsize        $length
+  gsize        $length is rw
 )
-  returns Str
+  returns CArray[uint8]
   is      native(gcr)
   is      export
 { * }
