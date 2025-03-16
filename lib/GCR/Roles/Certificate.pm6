@@ -2,6 +2,7 @@ use v6.c;
 
 use GCR::Raw::Types;
 use GCR::Raw::Certificate;
+use GCR::Raw::Trust;
 
 use GLib::DateTime;
 use GCR::Certificate::Section;
@@ -317,6 +318,323 @@ class GCR::Certificate {
 
   method get_type {
     self.gcrcertificate_get_type;
+  }
+
+  # Trust
+
+  method add_pinned_certificate (
+    Str()                   $purpose,
+    Str()                   $peer,
+    GCancellable()          $cancellable,
+    CArray[Pointer[GError]] $error        = gerror
+  ) {
+    clear_error;
+    my $r = gcr_trust_add_pinned_certificate(
+      $!gc,
+      $purpose,
+      $peer,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r;
+  }
+
+  proto method add_pinned_certificate_async (|)
+  { * }
+
+  multi method add_pinned_certificate_async (
+     $purpose,
+     $peer,
+     &callback,
+     $user_data   = gpointer,
+    :$cancellable = GCancellable
+  ) {
+    samewith(
+      $purpose,
+      $peer,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  multi method add_pinned_certificate_async (
+    Str()          $purpose,
+    Str()          $peer,
+    GCancellable() $cancellable,
+                   &callback,
+    gpointer       $user_data     = gpointer
+  ) {
+    gcr_trust_add_pinned_certificate_async(
+      $!gc,
+      $purpose,
+      $peer,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+
+  method add_pinned_certificate_finish (
+    GAsyncResult()          $result,
+    CArray[Pointer[GError]] $error    = gerror
+  ) {
+    clear_error;
+    my $r = gcr_trust_add_pinned_certificate_finish($result, $error);
+    set_error($error);
+  }
+
+  method is_certificate_anchored (
+    Str()                   $purpose,
+    GCancellable()          $cancellable = GCancellable,
+    CArray[Pointer[GError]] $error       = gerror
+  ) {
+    clear_error;
+    my $r = gcr_trust_is_certificate_anchored(
+      $!gc,
+      $purpose,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r;
+  }
+
+  proto method is_certificate_anchored_async (|)
+  { * }
+
+  multi method is_certificate_anchored_async (
+     $purpose,
+     &callback,
+     $user_data   = gpointer,
+    :$cancellable = GCancellable
+  ) {
+    samewith(
+      $purpose,
+      $cancellable,
+      &callback,
+      $user_data
+    )
+  }
+  multi method is_certificate_anchored_async (
+    Str()          $purpose,
+    GCancellable() $cancellable,
+                   &callback,
+    gpointer       $user_data     = gerror
+  ) {
+    gcr_trust_is_certificate_anchored_async($!gc, $purpose, $cancellable, $callback, $user_data);
+  }
+
+  method is_certificate_anchored_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error   = gerror
+  ) {
+    clear_error;
+    my $r = so gcr_trust_is_certificate_anchored_finish($result, $error);
+    set_error($error);
+    $r;
+  }
+
+  proto method is_certificate_distrusted (|)
+  { * }
+
+  multi method is_certificate_distrusted (
+    Str                      $serial_nr,
+    Str                      $issuer,
+                             $cancellable = GCancellable,
+    CArray[Pointer[GError]]  $error       = gerror,
+                            :$encoding    = 'utf8'
+  ) {
+    samewith(
+      $serial_nr.encode($encoding),
+      $issuer.encode($encoding),
+      $cancellable,
+      $error
+    );
+  }
+  multi method is_certificate_distrusted (
+    Blob[uint8]             $serial_nr,
+    Blob[uint8]             $issuer,
+                            $cancellable = GCancellable,
+    CArray[Pointer[GError]] $error       = gerror
+  ) {
+    samewith(
+      CArray[uint8].new($serial_nr),
+      $sserial_nr.bytes,
+      CArray[uint8].new($issuer),
+      $issuer.bytes,
+      $cancellable,
+      $error
+    );
+  }
+  method method is_certificate_distrusted (
+    CArray[uint8]           $serial_nr,
+    Int()                   $serial_nr_len,
+    CArray[uint8]           $issuer,
+    Int()                   $issuer_len,
+    GCancellable()          $cancellable    = GCancellable,
+    CArray[Pointer[GError]] $error          = gerror
+  ) {
+    my size_t($s, $i) = ($serial_nr_len, $issuer_len);
+
+    clear_error;
+    my $r = so gcr_trust_is_certificate_distrusted(
+      $serial_nr,
+      $s,
+      $issuer,
+      $i,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r;
+  }
+
+  method is_certificate_distrusted_async (
+    size_t              $serial_nr_len,
+    Str                 $issuer,
+    size_t              $issuer_len,
+    GCancellable        $cancellable,
+    GAsyncReadyCallback $callback,
+    Pointer             $user_data
+  ) {
+    gcr_trust_is_certificate_distrusted_async($!gc, $serial_nr_len, $issuer, $issuer_len, $cancellable, $callback, $user_data);
+  }
+
+  method is_certificate_distrusted_finish (
+    GAsyncResult            $result,
+    CArray[Pointer[GError]] $error   = gerror
+  ) {
+    clear_error;
+    my $r = so gcr_trust_is_certificate_distrusted_finish($result, $error);
+    set_error($error);
+    $r;
+  }
+
+  method is_certificate_pinned (
+    Str()                   $purpose,
+    Str()                   $peer,
+    GCancellable()          $cancellable = GCancellable,
+    CArray[Pointer[GError]] $error       = gpointer
+  ) {
+    clear_error;
+    my $r = so gcr_trust_is_certificate_pinned(
+      $!gc,
+      $purpose,
+      $peer,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r;
+  }
+
+  proto method is_certificate_pinned_async (|)
+  { * }
+
+  multi method is_certificate_pinned_async (
+     $purpose,
+     $peer,
+     &callback,
+     $user_data   = gpointer,
+    :$cancellable = GCancellable
+  ) {
+    samewith(
+      $purpose,
+      $peer,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  multi method is_certificate_pinned_async (
+    Str()          $purpose,
+    Str()          $peer,
+    GCancellable() $cancellable,
+                   &callback,
+    gpointer       $user_data     = gpointer
+  ) {
+    gcr_trust_is_certificate_pinned_async(
+      $!gc,
+      $purpose,
+      $peer,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+
+  method is_certificate_pinned_finish (
+    GAsyncResult()          $result,
+    CArray[Pointer[GError]] $error    = gerror
+  ) {
+    clear_error;
+    my $r = gcr_trust_is_certificate_pinned_finish($result, $error);
+    set_error($error);
+    $r;
+  }
+
+  method remove_pinned_certificate (
+    Str()                   $purpose,
+    Str()                   $peer,
+    GCancellable()          $cancellable,
+    CArray[Pointer[GError]] $error        = gerror
+  ) {
+    clear_error;
+    my $r = gcr_trust_remove_pinned_certificate(
+      $!gc,
+      $purpose,
+      $peer,
+      $cancellable,
+      $error
+    );
+    set_error($error);
+    $r
+  }
+
+  proto method remove_pinned_certificate_async (|)
+  { * }
+
+  multi method remove_pinned_certificate_async (
+     $purpose,
+     $peer,
+     &callback,
+     $user_data   = gpointer,
+    :$cancellable = GCancellable
+  ) {
+    samewith(
+      $purpose,
+      $peer,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+  multi method remove_pinned_certificate_async (
+    Str()          $purpose,
+    Str()          $peer,
+    GCancellable() $cancellable,
+                   &callback,
+    gpointer       $user_data
+  ) {
+    gcr_trust_remove_pinned_certificate_async(
+      $!gc,
+      $purpose,
+      $peer,
+      $cancellable,
+      &callback,
+      $user_data
+    );
+  }
+
+  method remove_pinned_certificate_finish (
+    GAsyncResult()          $result,
+    CArray[Pointer[GError]] $error   = gerror
+  ) {
+    clear_error;
+    my $r = gcr_trust_remove_pinned_certificate_finish($result, $error);
+    set_error($error);
+    $r;
   }
 
 }
