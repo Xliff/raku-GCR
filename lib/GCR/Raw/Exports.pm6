@@ -9,6 +9,5 @@ BEGIN {
     GCR::Raw::Definitions
     GCR::Raw::Enums
     GCR::Raw::OIDs
-    GCK::Raw::Structs
   >;
 }
