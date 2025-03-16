@@ -3,15 +3,18 @@ use v6.c;
 use NativeCall;
 
 use GLib::Raw::Definitions;
+use GLib::Raw::Structs;
 
 use GLib::Roles::Pointers;
+use GCR::PKCS11::Constants;
+
+use GLib::Roles::TypedBuffer;
 
 unit package GCR::Raw::Definitions;
 
 constant gcr is export = 'gcr-4',v4;
 
 class GckAllocator                is repr<CPointer> does GLib::Roles::Pointers is export { }
-class GckAttributes               is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GckEnumerator               is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GckModule                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GckObject                   is repr<CPointer> does GLib::Roles::Pointers is export { }
@@ -26,6 +29,7 @@ class GcrCertificateExtensionList is repr<CPointer> does GLib::Roles::Pointers i
 class GcrCertificateSection       is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrImporter                 is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrParsed                   is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrParser                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrPkcs11Certificate        is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrPrompt                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSecretExchange           is repr<CPointer> does GLib::Roles::Pointers is export { }
@@ -47,6 +51,35 @@ class GckSessionInfo is repr<CStruct> does GLib::Roles::Pointers is export {
   has gulong $.state        is rw;
   has gulong $.flags        is rw;
   has gulong $.device_error is rw;
+}
+
+class GckAttribute is repr<CStruct> does GLib::Roles::Pointers is export {
+  has gulong        $.type  is rw;
+  has CArray[uint8] $!value;
+  has gulong        $.length;         #= size($.value)
+
+  method value is rw {
+    Proxy.new(
+      FETCH => -> $     { SizedCArray.new($!value, $!length) },
+      STORE => -> $, \v { $!value := v }
+    );
+  }
+}
+
+class GckAttributes is repr<CStruct> does GLib::Roles::Pointers is export {
+  has gpointer $!data;   #= GckAttribute[]
+  has gulong   $.count;  #= size($.data)
+  has gint     $.refs;
+
+  method data {
+    GLib::Roles::TypedBuffer[GckAttribute].new-sized($!data, $!count);
+  }
+}
+
+class GckRealBuilder is repr<CStruct> does GLib::Roles::Pointers is export {
+  has GArray   $.array;
+  has gboolean $.secure;
+  has gint     $.refs;
 }
 
 constant GCR_DBUS_CALLBACK_INTERFACE        is export = 'org.gnome.keyring.internal.Prompter.Callback';
