@@ -1,9 +1,11 @@
 use v6.c;
 
 use NativeCall;
+use Method::Also;
 
 use GLib::Raw::Definitions;
 use GLib::Raw::Structs;
+use GLib::Raw::Subs;
 
 use GLib::Roles::Pointers;
 use GCR::PKCS11::Constants;
@@ -80,6 +82,97 @@ class GckRealBuilder is repr<CStruct> does GLib::Roles::Pointers is export {
   has GArray   $.array;
   has gboolean $.secure;
   has gint     $.refs;
+}
+
+class GckSlotInfo is repr<CStruct> does GLib::Roles::Pointers is export {
+  has Str    $.slot_description;
+  has Str    $.manufacturer_id;
+  has gulong $.flags;
+  has guint8 $.hardware_version_major;
+  has guint8 $.hardware_version_minor;
+  has guint8 $.firmware_version_major;
+  has guint8 $.firmware_version_minor;
+}
+
+class GckTokenInfo is repr<CStruct> does GLib::Roles::Pointers is export {
+  has Str       $.label;
+  has Str       $.manufacturer_id;
+  has Str       $.model;
+  has Str       $.serial_number;
+  has gulong    $.flags;
+  has glong     $.max_session_count;
+  has glong     $.session_count;
+  has glong     $.max_rw_session_count;
+  has glong     $.rw_session_count;
+  has glong     $.max_pin_len;
+  has glong     $.min_pin_len;
+  has glong     $.total_public_memory;
+  has glong     $.free_public_memory;
+  has glong     $.total_private_memory;
+  has glong     $.free_private_memory;
+  has guint8    $.hardware_version_major;
+  has guint8    $.hardware_version_minor;
+  has guint8    $.firmware_version_major;
+  has guint8    $.firmware_version_minor;
+  has GDateTime $!utc_time;
+
+  method utc-time ( :$raw = False, :raku(:dt(:$datetime)) = True ) is also<utc_time> {
+    use GLib::DateTime;
+
+    my $r = propReturnObject( $!utc_time, $raw, |GLib::DateTime.getTypePair );
+    return $r unless $datetime;
+    $r.DateTime
+  }
+
+  method posix-time {
+    use GLib::Raw::DateTime;
+
+    g_date_time_to_unix($!utc_time);
+  }
+}
+
+class GckMechanismInfo is repr<CStruct> does GLib::Roles::Pointers is export {
+  has gulong $.min_key_size;
+  has gulong $.max_key_size;
+  has gulong $.flags;
+}
+
+class GckModuleInfo is repr<CStruct> does GLib::Roles::Pointers is export {
+  has guint8        $.pkcs11_version_major;
+  has guint8        $.pkcs11_version_minor;
+  has CArray[uint8] $!manufacturer_id;
+  has gulong        $.flags;
+  has CArray[uint8] $!library_description;
+  has guint8        $.library_version_major;
+  has guint8        $.library_version_minor;
+
+  method manufacturer_id ( :$raw = False, :$encoding = 'utf8' )
+    is also<manufacturer-id>
+  {
+    return $!manufacturer_id if $raw;
+
+    Blob[uint8].new(
+      nullTerminatedBuffer($!manufacturer_id)
+    ).decode($encoding)
+  }
+
+  method library_description ( :$raw = False, :$encoding = 'utf8' )
+    is also<library-description>
+  {
+    return $!library_description if $raw;
+
+    Blob[uint8].new(
+      nullTerminatedBuffer($!library_description)
+    ).decode($encoding)
+  }
+}
+
+class GckUriData is repr<CStruct> does GLib::Roles::Pointers is export {
+  has gboolean      $.any_unrecognized;
+  has GckModuleInfo $.module_info;
+  has GckTokenInfo  $.token_info;
+  has GckAttributes $.attributes;
+  HAS gpointer      @.dummy[4]    is CArray;
 }
 
 constant GCR_DBUS_CALLBACK_INTERFACE        is export = 'org.gnome.keyring.internal.Prompter.Callback';
