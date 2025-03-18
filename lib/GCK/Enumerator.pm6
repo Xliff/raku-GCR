@@ -16,6 +16,7 @@ our subset GckEnumeratorAncestry is export of Mu
 
 class GCK::Enumerator {
   also does GLib::Roles::Object;
+  also does Iterable;
 
   has GckEnumerator $!ge is implementor;
 
@@ -184,6 +185,20 @@ class GCK::Enumerator {
     my gint   $c = $attr_count;
 
     gck_enumerator_set_object_type_full($!ge, $o, $attr_types, $c);
+  }
+
+  # Iterable
+  method iterator {
+    my $s = self;
+
+    (
+      class :: does Iterator {
+        method pull-one {
+          my $v = $s.next;
+          $v ?? $v !! IterationEnd;
+        }
+      }
+    ).new;
   }
 
 }
