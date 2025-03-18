@@ -76,14 +76,6 @@ class GCK::Session {
     $gck-session ?? self.bless( :$gck-session ) !! Nil;
   }
 
-  method processOptions (Int() $options is copy, $ro, $rw, $login, $auth) {
-    for $ro, $rw, $login, $auth {
-      $options +|= .so ?? .so !! +^( .so ) with $_;
-    }
-
-    $options;
-  }
-
   multi method open (
     GckSlot()                $slot,
     CArray[Pointer[GError]]  $error              = gerror,
@@ -97,7 +89,7 @@ class GCK::Session {
   ) {
     samewith(
       $slot,
-      $.processOptions($options, $ro, $rw, $login, $auth),
+      processSessionOptions($options, :$ro, :$rw, :$login, :$auth),
       $interaction,
       $cancellable,
       $error
@@ -143,7 +135,7 @@ class GCK::Session {
   ) {
     samewith(
       $slot,
-      $.processOptions($options, $ro, $rw, $login, $auth),
+      processSessionOptions($options, :$ro, :$rw, :$login, :$auth),
       $interaction,
       $cancellable,
       &callback,
@@ -2799,4 +2791,21 @@ class GCK::Session {
     Buf[uint8].new($ca);
   }
 
+}
+
+sub processSessionOptions (
+  Int() $options is copy,
+  :$ro,
+  :$rw      is copy,
+  :$login,
+  :$auth
+)
+  is export
+{
+  $rw = $ro.not if $ro.defined;
+  for $rw, $login, $auth {
+    $options +|= .so ?? .so !! +^( .so ) with $_;
+  }
+
+  $options;
 }
