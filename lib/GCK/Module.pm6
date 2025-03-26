@@ -1,5 +1,7 @@
 use v6.c;
 
+use Method::Also;
+
 use NativeCall;
 
 use GCR::Raw::Types;
@@ -14,12 +16,49 @@ use GCK::Slot;
 use GLib::Roles::Implementor;
 use GLib::Roles::Object;
 use GLib::Roles::StaticClass;
+use GCK::Roles::Signals::Module;
+
+our subset GckModuleAncestry is export of Mu
+  where GckModule | GObject;
 
 class GCK::Module {
   also does GLib::Roles::Object;
+  also does GCK::Roles::Signals::Module;
 
   has GckModule $!gm is implementor;
 
+  submethod BUILD ( :$gck-module ) {
+    self.setGckModule($gck-module) if $gck-module
+  }
+
+  method setGckModule (GckModuleAncestry $_) {
+    my $to-parent;
+
+    $!gm = do {
+      when GckModule {
+        $to-parent = cast(GObject, $_);
+        $_;
+      }
+
+      default {
+        $to-parent = $_;
+        cast(GckModule, $_);
+      }
+    }
+    self!setObject($to-parent);
+  }
+
+  method GCR::Raw::Definitions::GckModule
+    is also<GckModule>
+  { $!gm }
+
+  multi method new ($gck-module where * ~~ GckModuleAncestry , :$ref = True) {
+    return unless $gck-module;
+
+    my $o = self.bless( :$gck-module );
+    $o.ref if $ref;
+    $o;
+  }
   multi method new (gpointer $funcs) {
     my $gck-module = gck_module_new($funcs);
 
@@ -57,16 +96,20 @@ class GCK::Module {
     GCancellable() $cancellable,
                    &callback,
     gpointer       $user_data = gpointer
-  ) {
+  )
+    is also<initialize-async>
+  {
     gck_module_initialize_async($!gm, $cancellable, &callback, $user_data);
   }
-  multi method new_finish ($result, $error = gerror)  {
+  multi method new_finish ($result, $error = gerror)  is also<new-finish> {
     self.initialize_finish($result, $error);
   }
   method initialize_finish (
     GAsyncResult()          $result,
     CArray[Pointer[GError]] $error   = gerror;
-  ) {
+  )
+    is also<initialize-finish>
+  {
     clear_error;
     my $gck-module = gck_module_initialize_finish($result, $error);
     set_error($error);
@@ -74,19 +117,27 @@ class GCK::Module {
     $gck-module ?? self.bless( :$gck-module ) !! Nil;
   }
 
+  method Authenticate-Object ( :$raw = False ) {
+    self.connect-authenticate-object($!gm, :$raw);
+  }
+
+  method Authenticate-Slot ( :$raw = False ) {
+    self.connect-authenticate-slot($!gm, :$raw);
+  }
+
   method equal (GckModule() $module2) {
     gck_module_equal($!gm, $module2);
   }
 
-  method get_functions {
+  method get_functions is also<get-functions> {
     gck_module_get_functions($!gm);
   }
 
-  method get_info {
+  method get_info is also<get-info> {
     gck_module_get_info($!gm);
   }
 
-  method get_path {
+  method get_path is also<get-path> {
     gck_module_get_path($!gm);
   }
 
@@ -94,7 +145,9 @@ class GCK::Module {
     Int()  $token_present,
           :$raw            = False,
           :gslist(:$glist) = False
- ) {
+ )
+    is also<get-slots>
+  {
     my gboolean $t = $token_present.so.Int;
 
     returnGList(
@@ -126,7 +179,9 @@ class GCK::Modules {
                     :$rw,
                     :$user,
                     :auth(:$authenticate)
-  ) {
+  )
+    is also<enumerate-objects>
+  {
     my GckSessionOptions $o = processSessionOptions(
        $session_options,
       :$rw,
@@ -150,7 +205,9 @@ class GCK::Modules {
                             :$rw,
                             :$user,
                             :auth(:$authenticate)
-  ) {
+  )
+    is also<enumerate-uri>
+  {
     clear_error;
     my $r = gck_modules_enumerate_uri(
       $modules,
@@ -167,7 +224,9 @@ class GCK::Modules {
     Int()    $token_present,
             :$raw            = False,
             :gslist(:$glist) = False
-  ) {
+  )
+    is also<get-slots>
+  {
     my gboolean $t = $token_present.so.Int;
 
     propReturnObject(
@@ -183,7 +242,9 @@ class GCK::Modules {
     CArray[Pointer[GError]]  $error          = gerror,
                             :$raw            = False,
                             :gslist(:$glist) = False
-  ) {
+  )
+    is also<initialize-registered>
+  {
     clear_error;
     my $r = gck_modules_initialize_registered($cancellable, $error);
     set_error($error);
@@ -194,7 +255,9 @@ class GCK::Modules {
     GCancellable() $cancellable,
                    &callback     = GCancellable,
     gpointer       $user_data    = gpointer
-  ) {
+  )
+    is also<initialize-registered-async>
+  {
     gck_modules_initialize_registered_async(
       $cancellable,
       &callback,
@@ -207,7 +270,9 @@ class GCK::Modules {
     CArray[Pointer[GError]]  $error          = gerror,
                             :$raw            = False,
                             :gslist(:$glist) = False
-  ) {
+  )
+    is also<initialize-registered-finish>
+  {
     clear_error;
     my $r = gck_modules_initialize_registered_finish($result, $error);
     set_error($error);
@@ -220,7 +285,9 @@ class GCK::Modules {
     CArray[Pointer[GError]]  $error          = gerror,
                             :$raw            = False,
                             :gslist(:$glist) = False
-  ) {
+  )
+    is also<tokens-for-uri>
+  {
     returnGList(
       gck_modules_tokens_for_uri($modules, $uri, $error),
       $raw,
@@ -230,6 +297,7 @@ class GCK::Modules {
   }
 
   proto method object_for_uri (|)
+    is also<object-for-uri>
   { * }
 
   multi method object_for_uri (
@@ -265,6 +333,7 @@ class GCK::Modules {
   }
 
   proto method objects_for_uri (|)
+    is also<objects-for-uri>
   { * }
 
   multi method objects_for_uri (
@@ -320,6 +389,7 @@ class GCK::Module::Info {
   }
 
   method GCR::Raw::Definitions::GckModuleInfo
+    is also<GckModuleInfo>
   { $!gm }
 
   method new (GckModuleInfo $gck-module-info) {
@@ -338,7 +408,7 @@ class GCK::Module::Info {
     gck_module_info_free($!gm);
   }
 
-  method get_type {
+  method get_type is also<get-type> {
     state ($n, $t);
 
     unstable_get_type( self.^name, &gck_module_info_get_type, $n, $t );
