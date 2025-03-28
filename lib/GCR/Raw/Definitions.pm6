@@ -36,6 +36,7 @@ class GcrPkcs11Certificate        is repr<CPointer> does GLib::Roles::Pointers i
 class GcrPrompt                   is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSecretExchange           is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSimpleCertificate        is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrSshAgentPreload          is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSubjectPublicKeyInfo     is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompt             is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompter           is repr<CPointer> does GLib::Roles::Pointers is export { }
@@ -173,6 +174,12 @@ class GckUriData is repr<CStruct> does GLib::Roles::Pointers is export {
   has GckTokenInfo  $.token_info;
   has GckAttributes $.attributes;
   HAS gpointer      @.dummy[4]    is CArray;
+}
+
+class GcrSshAgentKeyInfo is repr<CStruct> does GLib::Roles::Pointers is export {
+  has Str    $.filename;
+  has GBytes $.public_key;
+  has Str    $.comment;
 }
 
 constant GCR_DBUS_CALLBACK_INTERFACE        is export = 'org.gnome.keyring.internal.Prompter.Callback';
