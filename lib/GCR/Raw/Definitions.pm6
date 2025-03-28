@@ -194,3 +194,5 @@ constant GCR_DBUS_PROMPTER_MOCK_BUS_NAME    is export = 'org.gnome.keyring.MockP
 constant GCR_DBUS_PROMPTER_OBJECT_PATH      is export = '/org/gnome/keyring/Prompter';
 constant GCR_DBUS_PROMPTER_PRIVATE_BUS_NAME is export = 'org.gnome.keyring.PrivatePrompter';
 constant GCR_DBUS_PROMPTER_SYSTEM_BUS_NAME  is export = 'org.gnome.keyring.SystemPrompter';
+
+our $PKCS11-INITIALIZE-AT-START is export = True;
