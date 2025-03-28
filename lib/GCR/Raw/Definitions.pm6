@@ -37,6 +37,8 @@ class GcrPrompt                   is repr<CPointer> does GLib::Roles::Pointers i
 class GcrSecretExchange           is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSimpleCertificate        is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSshAgentPreload          is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrSshAgentProcess          is repr<CPointer> does GLib::Roles::Pointers is export { }
+class GcrSshAgentService          is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSubjectPublicKeyInfo     is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompt             is repr<CPointer> does GLib::Roles::Pointers is export { }
 class GcrSystemPrompter           is repr<CPointer> does GLib::Roles::Pointers is export { }
