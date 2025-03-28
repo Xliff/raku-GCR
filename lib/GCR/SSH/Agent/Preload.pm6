@@ -130,8 +130,8 @@ class GCR::SSH::Agent::Preload {
       CATCH {
         default {
           if .message.starts-with("Don't know how many elements") {
-            $*ERROR.say: "Must specify length of array!"
-              if .message contains
+            $*ERROR.say: "Must specify length of array!";
+            return;
           } else {
             .rethrow
           }
